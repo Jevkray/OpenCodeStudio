@@ -37,6 +37,9 @@
 
 ## Overview
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Jevkray/OpenCodeStudio/main/vs/Resources/PreviewWork.jpg" width="max" alt="OpenCode Studio" />
+</p>
 **OpenCode Studio** embeds the full [OpenCode](https://opencode.ai) web interface into a Visual Studio tool window using WebView2. Unlike a proxy-based integration, it points the browser **straight at the OpenCode server that it launches itself** — fewer moving parts, fewer bugs, and it stays in sync with every OpenCode release.
 
 Everything runs **locally** on `127.0.0.1`. No account, no telemetry, no data leaves your machine.
