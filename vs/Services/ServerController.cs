@@ -70,7 +70,10 @@ namespace OpenCodeStudio.Services
                     return false;
             }
 
-            // Get or create session
+            // Find an existing session for this project. We deliberately do NOT
+            // create one here: the OpenCode web UI does that on demand, and
+            // auto-creating an empty session on every project change only adds
+            // clutter. If nothing is found we simply open the web UI home.
             Models.Session curSession = null;
             try
             {
@@ -89,16 +92,11 @@ namespace OpenCodeStudio.Services
             }
             catch { }
 
-            if (curSession == null)
-            {
-                curSession = await _sessionService.CreateSessionAsync(projectRoot);
-            }
-
-            _currentSessionId = curSession.Id;
+            _currentSessionId = curSession?.Id;
             // Keep the directory exactly as OpenCode reports it (Windows path
             // with backslashes). The web client encodes this value into the URL,
             // so a normalized (forward-slash) path would not match the project.
-            _currentSessionDirectory = curSession.Directory;
+            _currentSessionDirectory = curSession?.Directory;
 
             // Start connection monitoring
             if (_connectionMonitor == null)
@@ -139,6 +137,18 @@ namespace OpenCodeStudio.Services
                 : (_currentProjectRoot ?? "");
             var encoded = ToUrlSafeBase64(dir);
             return $"{baseUrl}/{encoded}/session/{_currentSessionId}";
+        }
+
+        /// <summary>
+        /// URL of the OpenCode web UI home. Opening the home (instead of a
+        /// project-scoped session) shows all projects and every chat, exactly
+        /// like the OpenCode desktop app.
+        /// </summary>
+        public string GetHomeUrl()
+        {
+            if (_serverService.ServerInfo == null)
+                return null;
+            return _serverService.ServerInfo.BaseUrl + "/";
         }
 
         public void Stop()

@@ -14,6 +14,7 @@ namespace OpenCodeStudio.Services
     {
         private const int ConnectTimeoutMs = 30000;
         private const int HealthCheckIntervalMs = 500;
+        private const int PreferredPort = 4096;
 
         private System.Diagnostics.Process _process;
         private HttpClient _httpClient;
@@ -80,16 +81,20 @@ namespace OpenCodeStudio.Services
 
                 // .cmd/.bat shims cannot be started directly with UseShellExecute=false,
                 // so launch them through cmd.exe.
+                // A stable port keeps the WebView2 origin (http://127.0.0.1:PORT)
+                // constant across restarts, so the OpenCode web UI keeps its
+                // local state (selected server/project) like the desktop app.
+                var port = IsPortFree(PreferredPort) ? PreferredPort : 0;
                 if (opencodePath.EndsWith(".cmd", StringComparison.OrdinalIgnoreCase) ||
                     opencodePath.EndsWith(".bat", StringComparison.OrdinalIgnoreCase))
                 {
                     psi.FileName = "cmd.exe";
-                    psi.Arguments = "/c \"" + opencodePath + "\" serve";
+                    psi.Arguments = "/c \"" + opencodePath + "\" serve --port " + port;
                 }
                 else
                 {
                     psi.FileName = opencodePath;
-                    psi.Arguments = "serve";
+                    psi.Arguments = "serve --port " + port;
                 }
 
                 _process = System.Diagnostics.Process.Start(psi);
@@ -241,6 +246,19 @@ namespace OpenCodeStudio.Services
         private static void RemoveSharedRegistry()
         {
             try { if (File.Exists(RegistryPath)) File.Delete(RegistryPath); } catch { }
+        }
+
+        private static bool IsPortFree(int port)
+        {
+            try
+            {
+                var listener = new System.Net.Sockets.TcpListener(
+                    System.Net.IPAddress.Loopback, port);
+                listener.Start();
+                listener.Stop();
+                return true;
+            }
+            catch { return false; }
         }
 
         public void UpdateConnectionState(bool connected)

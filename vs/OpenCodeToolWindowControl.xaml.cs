@@ -266,7 +266,7 @@ namespace OpenCodeStudio
             _ = ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                var url = _serverController?.GetSessionUrl();
+                var url = _serverController?.GetHomeUrl();
                 if (url != null && webView.CoreWebView2 != null)
                     webView.CoreWebView2.Navigate(url);
                 else
@@ -325,7 +325,7 @@ namespace OpenCodeStudio
                             {
                                 Debug.WriteLine($"Reconnected on attempt {attempt}");
                                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                                var url = _serverController.GetSessionUrl();
+                                var url = _serverController.GetHomeUrl();
                                 if (url != null && webView.CoreWebView2 != null)
                                     NavigateToSession(url);
                                 else
@@ -380,7 +380,7 @@ namespace OpenCodeStudio
                 && _serverController.State == ConnectionState.Connected
                 && !string.IsNullOrEmpty(_serverController.CurrentSessionId))
             {
-                var existingUrl = _serverController.GetSessionUrl();
+                var existingUrl = _serverController.GetHomeUrl();
                 if (existingUrl != null)
                 {
                     NavigateToSession(existingUrl);
@@ -397,7 +397,7 @@ namespace OpenCodeStudio
                 return;
             }
 
-            var sessionUrl = _serverController.GetSessionUrl();
+            var sessionUrl = _serverController.GetHomeUrl();
             if (sessionUrl != null)
                 NavigateToSession(sessionUrl);
 

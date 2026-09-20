@@ -3,6 +3,13 @@
 All notable changes to **OpenCode Studio** are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.9] - 2026-09-20
+
+### Changed
+- The tool window now opens the OpenCode web UI **home**, so all projects and every chat are visible - exactly like the OpenCode desktop app.
+- The server uses a **stable port** (4096 when free), keeping the WebView2 origin constant so the web UI remembers its state between restarts.
+- The extension no longer creates an empty session on every project change.
+
 ## [1.0.8] - 2026-09-20
 
 ### Fixed
@@ -45,6 +52,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 - Initial public release: OpenCode web UI embedded in a Visual Studio tool window.
 
+[1.0.9]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.9
 [1.0.8]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.8
 [1.0.7]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.7
 [1.0.6]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.6
