@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=Jevkray.OpenCodeStudio"><img src="https://img.shields.io/visual-studio-marketplace/v/Jevkray.OpenCodeStudio?label=marketplace&color=7C3AED" alt="Marketplace"></a>
-  <a href="https://marketplace.visualstudio.com/items?itemName=Jevkray.OpenCodeStudio"><img src="https://img.shields.io/visual-studio-marketplace/i/Jevkray.OpenCodeStudio?color=7C3AED" alt="Установки"></a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=jevkray.OpenCodeStudio"><img src="https://img.shields.io/visual-studio-marketplace/v/jevkray.OpenCodeStudio?label=marketplace&color=7C3AED" alt="Marketplace"></a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=jevkray.OpenCodeStudio"><img src="https://img.shields.io/visual-studio-marketplace/i/jevkray.OpenCodeStudio?color=7C3AED" alt="Установки"></a>
   <img src="https://img.shields.io/badge/Visual%20Studio-2022%20%7C%202026-7C3AED" alt="Visual Studio 2022 / 2026">
   <img src="https://img.shields.io/badge/license-MIT-7C3AED" alt="Лицензия: MIT">
   <img src="https://img.shields.io/badge/.NET%20Framework-4.7.2-7C3AED" alt=".NET Framework 4.7.2">
