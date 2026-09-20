@@ -1,78 +1,61 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Jevkray/OpenCodeStudio/main/vs/Resources/PreviewImage.png" width="240" alt="OpenCode Studio" />
-</p>
+<div align="center">
 
-<h1 align="center">OpenCode Studio</h1>
+<img src="https://raw.githubusercontent.com/Jevkray/OpenCodeStudio/main/vs/Resources/PreviewImage.png" width="240" alt="OpenCode Studio" />
 
-<p align="center">
-  <b>OpenCode-агент, встроенный прямо в Visual Studio.</b><br/>
-  Быстрое, самодостаточное окно-инструмент с панелью статистики, мастером переноса при первом запуске и общей историей чатов.
-</p>
+# 🟣 OpenCode Studio
 
-<p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=jevkray.OpenCodeStudio"><img src="https://img.shields.io/visual-studio-marketplace/v/jevkray.OpenCodeStudio?label=marketplace&color=7C3AED" alt="Marketplace"></a>
-  <a href="https://marketplace.visualstudio.com/items?itemName=jevkray.OpenCodeStudio"><img src="https://img.shields.io/visual-studio-marketplace/i/jevkray.OpenCodeStudio?color=7C3AED" alt="Установки"></a>
-  <img src="https://img.shields.io/badge/Visual%20Studio-2022%20%7C%202026-7C3AED" alt="Visual Studio 2022 / 2026">
-  <img src="https://img.shields.io/badge/license-MIT-7C3AED" alt="Лицензия: MIT">
-  <img src="https://img.shields.io/badge/.NET%20Framework-4.7.2-7C3AED" alt=".NET Framework 4.7.2">
-</p>
+**OpenCode-агент — прямо внутри Visual Studio.**
 
-<p align="center">
-  <a href="README.md">English</a> ·
-  <a href="README.ru.md">Русский</a>
-</p>
+*Быстрое, самодостаточное окно-инструмент с панелью статистики, мастером переноса при первом запуске и общей историей чатов.*
+
+[![Marketplace](https://img.shields.io/visual-studio-marketplace/v/jevkray.OpenCodeStudio?label=marketplace&color=7C3AED)](https://marketplace.visualstudio.com/items?itemName=jevkray.OpenCodeStudio)
+[![Установки](https://img.shields.io/visual-studio-marketplace/i/jevkray.OpenCodeStudio?color=7C3AED)](https://marketplace.visualstudio.com/items?itemName=jevkray.OpenCodeStudio)
+[![Рейтинг](https://img.shields.io/visual-studio-marketplace/r/jevkray.OpenCodeStudio?color=7C3AED)](https://marketplace.visualstudio.com/items?itemName=jevkray.OpenCodeStudio)
+![Visual Studio](https://img.shields.io/badge/Visual%20Studio-2022%20%7C%202026-7C3AED)
+![Лицензия](https://img.shields.io/badge/license-MIT-7C3AED)
+![.NET](https://img.shields.io/badge/.NET%20Framework-4.7.2-7C3AED)
+
+**[English](README.md) · [Русский](README.ru.md)**
+
+</div>
 
 ---
 
-```text
-  ╭──────────────────────────────────────────────────────────────╮
-  │                                                              │
-  │    O P E N C O D E   S T U D I O                             │
-  │                                                              │
-  │    OpenCode прямо внутри Visual Studio                       │
-  │    Тёмно-фиолетовый. Локально. Без настройки.                │
-  │                                                              │
-  ╰──────────────────────────────────────────────────────────────╯
-```
+> [!TIP]
+> **Одно окружение — везде.** OpenCode Studio использует те же данные, что OpenCode CLI и desktop-приложение — провайдеры, настройки, ключи и **все чаты** уже на месте. Никакой настройки и дублирования.
 
-## Обзор
+## ✨ Почему OpenCode Studio?
 
-**OpenCode Studio** встраивает полноценный веб-интерфейс [OpenCode](https://opencode.ai) в окно-инструмент Visual Studio через WebView2. В отличие от интеграции через прокси, расширение направляет браузер **напрямую на сервер OpenCode, который запускает само** — меньше движущихся частей, меньше ошибок и синхронность с каждым релизом OpenCode.
+| | |
+|---|---|
+| 🧠 | **Настоящий OpenCode, а не клон** — полный официальный веб-UI прямо в Visual Studio. |
+| 🔄 | **Общая история** — те же чаты, что в CLI и desktop, во всех окнах Visual Studio. |
+| 🗂️ | **Видны все чаты** — открывается главная веб-UI со списком всех проектов и сессий. |
+| 📊 | **Панель статистики** — расход, токены и запросы с графиками в стиле OpenCode. |
+| 📥 | **Мастер при первом запуске** — импорт настроек, тем, ключей и истории в один клик. |
+| 🔁 | **Авто-переподключение** — само восстанавливает сессию при обрыве связи. |
+| 🔒 | **Локально** — только loopback, ноль телеметрии. |
+| 🪶 | **Лёгкий** — один VSIX для Visual Studio 2022 и 2026. |
 
-Расширение использует **то же окружение данных**, что OpenCode CLI и desktop-приложение, поэтому провайдеры, настройки, ключи и история чатов везде одинаковые. Всё работает **локально** на `127.0.0.1`. Никаких аккаунтов, телеметрии и передачи данных наружу.
-
-## Превью
+## 📸 Превью
 
 ![OpenCode Studio прямо внутри Visual Studio](https://raw.githubusercontent.com/Jevkray/OpenCodeStudio/main/vs/Resources/PreviewWork.jpg)
 
-*OpenCode Studio внутри Visual Studio: чат с агентом рядом с решением, панель сессии показывает модель, провайдера, расход токенов, стоимость, последнюю активность и разбивку контекста.*
+> 💬 *Чат с агентом рядом с решением — и живая панель сессии с моделью, провайдером, расходом токенов, стоимостью, последней активностью и разбивкой контекста.*
 
-## Что нового
+## 🚀 Быстрый старт
 
-| Версия | Изменения |
-|--------|-----------|
-| **1.0.10** | Обновлённая документация, контакты и руководство по синхронизации истории. |
-| **1.0.9** | Открывается **главная** веб-UI — видны все проекты и чаты; фиксированный порт; больше нет авто-создания пустых сессий. |
-| **1.0.8** | Починена загрузка истории (правильное кодирование каталога проекта в URL + явный UTF-8). |
-| **1.0.7** | История синхронизируется с CLI и desktop; несколько окон Visual Studio используют один сервер OpenCode. |
-| **1.0.6** | Новый бренд и набор иконок; мастер переноса при первом запуске. |
+```text
+  Вид      →  Другие окна          →  OpenCode Studio        🔹 агент
+  Сервис   →  OpenCode Studio Usage Statistics               📊 расход и токены
+  Сервис   →  OpenCode Studio Import Settings...             📥 мастер настройки
+```
 
-## Возможности
+> [!NOTE]
+> **Требование:** [OpenCode CLI](https://opencode.ai) должен быть установлен и доступен в `PATH`.
 
-| Возможность | Описание |
-|-------------|----------|
-| Нативный веб-UI | Полный интерфейс OpenCode (проекты, сессии, вкладки, темы) отображается напрямую — без прослоек и внедряемых скриптов. |
-| Общая история | Использует те же данные, что CLI и desktop, поэтому все чаты доступны везде и во всех окнах Visual Studio. |
-| Видны все чаты | Открывается главная веб-UI со списком всех проектов и сессий — как в desktop-приложении. |
-| Сессии по проектам | Определяет корень решения / Git и запоминает последний проект, поэтому история не «исчезает». |
-| Панель статистики | Отдельное окно с расходом, токенами, запросами и графиками в стиле OpenCode, с живым обновлением. |
-| Мастер переноса | Находит все установки OpenCode (CLI, Desktop, папка) и переносит настройки, темы, ключи и историю в один клик. |
-| Авто-переподключение | При обрыве связи окно показывает страницу прогресса и само восстанавливает сессию. |
-| Стиль Visual Studio | Страницы загрузки и ошибок подстраиваются под цветовую тему Visual Studio. |
-| Логирование | Диагностика пишется в `%LOCALAPPDATA%\OpenCodeStudio\logs\opencode-studio.log`. |
-| VS 2022 и 2026 | Один VSIX для обеих версий. |
-
-## Установка
+<details>
+<summary><b>📦 Установка</b></summary>
 
 **Из Visual Studio Marketplace (рекомендуется)**
 
@@ -85,80 +68,75 @@
 1. Скачайте последний `OpenCodeStudio-x.y.z.vsix` из [Releases](https://github.com/Jevkray/OpenCodeStudio/releases).
 2. Закройте все окна Visual Studio и дважды кликните по файлу.
 
-> **Требование:** [OpenCode CLI](https://opencode.ai) должен быть установлен и доступен в `PATH`.
+</details>
 
-## Начало работы
+## 🔗 Синхронизация истории чатов
 
-```text
-  Вид      → Другие окна → OpenCode Studio        (агент)
-  Сервис   → OpenCode Studio Usage Statistics     (расход и токены)
-  Сервис   → OpenCode Studio Import Settings...   (мастер настройки)
-```
+OpenCode хранит каждую сессию **в привязке к каталогу проекта**, в котором она создана. Поскольку OpenCode Studio использует те же данные, что CLI и desktop, все чаты уже доступны — но сгруппированы по пути проекта.
 
-Окно открывает главную веб-UI OpenCode. Оттуда можно выбрать проект, открыть существующий чат или создать новую сессию.
+> [!IMPORTANT]
+> Если проект находится по **другому абсолютному пути**, чем при создании чатов (другой диск, другое имя пользователя, перемещённая или переименованная папка), сессии останутся привязаны к исходному пути. **Приведите пути проектов в соответствие — и всё синхронизируется.**
 
-## Синхронизация истории чатов
-
-OpenCode хранит каждую сессию **в привязке к каталогу проекта**, в котором она создана. Поскольку OpenCode Studio использует то же окружение данных, что CLI и desktop, все чаты уже доступны — но сгруппированы по пути проекта.
-
-Если проект находится по **другому абсолютному пути**, чем при создании чатов (другой диск, другое имя пользователя, перемещённая или переименованная папка), эти сессии остаются привязаны к исходному пути и не появятся рядом с проектом в новом расположении. Чтобы собрать всю историю:
-
-1. Открывайте каждый проект по **тому же абсолютному пути**, что использовался изначально (например `C:\Users\<вы>\source\repos\MyApp`).
+1. Открывайте каждый проект по **тому же абсолютному пути**, что использовался изначально — например `C:\Users\<вы>\source\repos\MyApp`.
 2. Если путь изменился — верните проект на место либо перенесите старые данные через **Сервис → OpenCode Studio Import Settings...**, указав папку с исходным `opencode.db`.
 3. Переоткройте окно-инструмент — сессии появятся у нужного проекта.
 
-Как только пути проектов совпадают, **все чаты синхронизируются** между CLI, desktop-приложением и всеми окнами Visual Studio.
+Как только пути совпадают, **все чаты синхронизируются** между CLI, desktop-приложением и всеми окнами Visual Studio. 🎉
 
-## Статистика
+## 📊 Статистика
 
-Откройте **Сервис → OpenCode Studio Usage Statistics** — локальная панель на данных API OpenCode, без сторонних сервисов:
+> [!NOTE]
+> **Сервис → OpenCode Studio Usage Statistics** открывает **локальную** панель на данных API OpenCode — без сторонних сервисов.
 
-- **KPI-карточки** — общий расход, токены, сессии и запросы.
-- **Расход по дням** — плавный график площади.
-- **Токены по типам** — input / output / reasoning / cache в кольцевой диаграмме.
-- **Расход по моделям** и **расход на запрос** для текущей сессии.
-- **Таблица сессий** с моделью, агентом, токенами и стоимостью.
+| 📈 Панель | Что показывает |
+|---|---|
+| 💰 KPI-карточки | Общий расход, токены, сессии, запросы |
+| 🗓️ Расход по дням | Плавный график площади |
+| 🍩 Токены по типам | Input / output / reasoning / cache |
+| 🤖 Расход по моделям | Затраты по каждой модели |
+| 🔍 Расход на запрос | Для текущей сессии |
+| 📋 Таблица сессий | Модель, агент, токены и стоимость |
 
-## Архитектура
+## 🧱 Архитектура
 
 Ядро OpenCode Studio намеренно компактное и разделённое.
 
 ```text
-  ┌──────────────────────────────────────────────────────────────┐
-  │  OpenCodeStudioPackage            пакет VS и команды         │
-  ├──────────────────────────────────────────────────────────────┤
-  │  ServerController                жизненный цикл сервера      │
-  │    ├── OpenCodeServerService      запускает `opencode serve` │
-  │    ├── OpenCodeSessionService     API /session, /project     │
-  │    ├── ConnectionMonitor          периодические проверки     │
-  │    └── ProcessBinding             завершается вместе с VS    │
-  ├──────────────────────────────────────────────────────────────┤
-  │  OpenCodeToolWindowControl        хост WebView2              │
-  │    └── открывает http://127.0.0.1:<port>/ (главная веб-UI)   │
-  ├──────────────────────────────────────────────────────────────┤
-  │  UsageStatsWindow                 панель статистики          │
-  │  FirstRunWindow                   мастер переноса            │
-  │  ImportService / OpenCodeEnvironment / Log                   │
-  └──────────────────────────────────────────────────────────────┘
+ ┌──────────────────────────────────────────────────────────────┐
+ │  OpenCodeStudioPackage            пакет VS и команды         │
+ ├──────────────────────────────────────────────────────────────┤
+ │  ServerController                жизненный цикл сервера      │
+ │    ├── OpenCodeServerService      запускает `opencode serve` │
+ │    ├── OpenCodeSessionService     API /session, /project     │
+ │    ├── ConnectionMonitor          периодические проверки     │
+ │    └── ProcessBinding             завершается вместе с VS    │
+ ├──────────────────────────────────────────────────────────────┤
+ │  OpenCodeToolWindowControl        хост WebView2              │
+ │    └── открывает http://127.0.0.1:<port>/ (главная веб-UI)   │
+ ├──────────────────────────────────────────────────────────────┤
+ │  UsageStatsWindow                 панель статистики          │
+ │  FirstRunWindow                   мастер переноса            │
+ │  ImportService / OpenCodeEnvironment / Log                   │
+ └──────────────────────────────────────────────────────────────┘
 ```
 
-**Принципы дизайна**
+> [!TIP]
+> **Принципы дизайна**
+> - **Без прокси** — WebView2 работает с реальным адресом сервера, интерфейс истинный и не ломается при обновлениях.
+> - **Общие данные** — запуск в вашем стандартном окружении, синхронно с CLI и desktop.
+> - **Один сервер на машину** — все окна Visual Studio используют один сервер OpenCode.
+> - **Локально по умолчанию** — только loopback, исходящих запросов нет, кроме ваших провайдеров.
 
-- **Без прокси.** WebView2 работает с реальным адресом сервера — интерфейс всегда настоящий и не ломается при обновлениях.
-- **Общие данные.** OpenCode запускается в вашем стандартном окружении, поэтому история и настройки синхронны с CLI и desktop.
-- **Один сервер на машину.** Небольшой файл-реестр позволяет всем окнам Visual Studio использовать один сервер OpenCode — сессии и статусы синхронны.
-- **Локально по умолчанию.** Привязка к loopback, исходящих запросов нет, кроме настроенных вами провайдеров.
-
-## Требования
+## 🧩 Требования
 
 | Компонент | Версия |
-|-----------|--------|
-| Visual Studio | 2022 (17.0) – 2026 |
-| OpenCode CLI | установлен и в `PATH` |
-| .NET SDK (сборка из исходников) | .NET 10 |
-| WebView2 Runtime | входит в Windows 10/11 и VS |
+|---|---|
+| 🖥️ Visual Studio | 2022 (17.0) – 2026 |
+| ⚡ OpenCode CLI | установлен и в `PATH` |
+| 🛠️ .NET SDK *(сборка из исходников)* | .NET 10 |
+| 🌐 WebView2 Runtime | входит в Windows 10/11 и VS |
 
-## Сборка из исходников
+## 🔨 Сборка из исходников
 
 ```bash
 git clone https://github.com/Jevkray/OpenCodeStudio.git
@@ -166,29 +144,28 @@ cd OpenCodeStudio
 dotnet build vs/OpenCodeStudio.csproj -c Release
 ```
 
-VSIX появится в `vs/bin/Release/net472/OpenCodeStudio.vsix`.
-Для отладки откройте `OpenCodeStudio.sln` в Visual Studio и нажмите **F5** (экспериментальный экземпляр).
+VSIX появится в `vs/bin/Release/net472/OpenCodeStudio.vsix`. Для отладки откройте `OpenCodeStudio.sln` и нажмите **F5** (экспериментальный экземпляр). 🧪
 
-## Приватность
+## 🛡️ Приватность
 
-OpenCode Studio — **локальное** расширение:
+- 🖧 сервер слушает только `127.0.0.1`
+- 🔑 ключи хранит сам OpenCode в вашем окружении
+- 🚫 нет телеметрии и аналитики
+- 📊 панель статистики читает данные с локального сервера
 
-- сервер слушает только `127.0.0.1`;
-- ключи хранит сам OpenCode в вашем окружении;
-- расширение не отправляет телеметрию и не содержит аналитики;
-- панель статистики читает данные с локального сервера.
+## 💬 Контакты и поддержка
 
-## Контакты и поддержка
+<div align="center">
 
-| | |
-|---|---|
-| Telegram | [@eugenekray](https://t.me/eugenekray) |
-| Почта | [krasovskyworks@gmail.com](mailto:krasovskyworks@gmail.com) |
-| Поддержать проект | [boosty.to/jevkray](https://boosty.to/jevkray) |
-| Идеи и ошибки | [GitHub Issues](https://github.com/Jevkray/OpenCodeStudio/issues) |
+[![Telegram](https://img.shields.io/badge/Telegram-@eugenekray-2CA5E0?logo=telegram&logoColor=white)](https://t.me/eugenekray)
+[![Почта](https://img.shields.io/badge/Email-krasovskyworks@gmail.com-EA4335?logo=gmail&logoColor=white)](mailto:krasovskyworks@gmail.com)
+[![Boosty](https://img.shields.io/badge/Поддержать-Boosty-FF6A00?logo=boosty&logoColor=white)](https://boosty.to/jevkray)
+[![Issues](https://img.shields.io/badge/Issues-GitHub-181717?logo=github&logoColor=white)](https://github.com/Jevkray/OpenCodeStudio/issues)
 
-## Лицензия
+</div>
+
+## 📜 Лицензия
 
 Распространяется по лицензии [MIT](LICENSE).
 
-<p align="center"><sub>Создано для сообщества OpenCode · Не связано с OpenCode или Microsoft.</sub></p>
+<div align="center"><sub>Создано для сообщества OpenCode · Не связано с OpenCode или Microsoft.</sub></div>
