@@ -37,6 +37,9 @@
 
 ## Обзор
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Jevkray/OpenCodeStudio/main/vs/Resources/PreviewWork.jpg" width="max" alt="OpenCode Studio" />
+</p>
 **OpenCode Studio** встраивает полноценный веб-интерфейс [OpenCode](https://opencode.ai) в окно-инструмент Visual Studio через WebView2. В отличие от интеграции через прокси, расширение направляет браузер **напрямую на сервер OpenCode, который запускает само** — меньше движущихся частей, меньше ошибок и синхронность с каждым релизом OpenCode.
 
 Всё работает **локально** на `127.0.0.1`. Никаких аккаунтов, телеметрии и передачи данных наружу.
