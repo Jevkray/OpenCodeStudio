@@ -3,6 +3,12 @@
 All notable changes to **OpenCode Studio** are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.8] - 2026-09-20
+
+### Fixed
+- **Chat history now loads in the tool window.** The navigation URL now encodes the project directory exactly as OpenCode reports it (a Windows path with backslashes); previously a normalized forward-slash path produced a different base64 and the web UI could not resolve the project.
+- API responses are now decoded as UTF-8 explicitly, so non-ASCII (e.g. Cyrillic) project paths match correctly on .NET Framework.
+
 ## [1.0.7] - 2026-09-20
 
 ### Fixed
@@ -39,6 +45,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 - Initial public release: OpenCode web UI embedded in a Visual Studio tool window.
 
+[1.0.8]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.8
 [1.0.7]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.7
 [1.0.6]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.6
 [1.0.0]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.0

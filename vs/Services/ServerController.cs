@@ -19,6 +19,7 @@ namespace OpenCodeStudio.Services
 
         private string _currentProjectRoot;
         private string _currentSessionId;
+        private string _currentSessionDirectory;
 
         private CancellationTokenSource _shutdownCts;
         private CancellationTokenSource _workspaceCheckCts;
@@ -94,6 +95,10 @@ namespace OpenCodeStudio.Services
             }
 
             _currentSessionId = curSession.Id;
+            // Keep the directory exactly as OpenCode reports it (Windows path
+            // with backslashes). The web client encodes this value into the URL,
+            // so a normalized (forward-slash) path would not match the project.
+            _currentSessionDirectory = curSession.Directory;
 
             // Start connection monitoring
             if (_connectionMonitor == null)
@@ -129,8 +134,11 @@ namespace OpenCodeStudio.Services
                 return null;
 
             var baseUrl = _serverService.ServerInfo.BaseUrl;
-            var dir = ToUrlSafeBase64(_currentProjectRoot ?? "");
-            return $"{baseUrl}/{dir}/session/{_currentSessionId}";
+            var dir = !string.IsNullOrEmpty(_currentSessionDirectory)
+                ? _currentSessionDirectory
+                : (_currentProjectRoot ?? "");
+            var encoded = ToUrlSafeBase64(dir);
+            return $"{baseUrl}/{encoded}/session/{_currentSessionId}";
         }
 
         public void Stop()

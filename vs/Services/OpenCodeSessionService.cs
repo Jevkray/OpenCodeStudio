@@ -38,8 +38,20 @@ namespace OpenCodeStudio.Services
             if (!response.IsSuccessStatusCode)
                 throw new HttpRequestException($"Failed to list sessions: {response.StatusCode}");
 
-            var json = await response.Content.ReadAsStringAsync();
+            var json = await ReadUtf8Async(response.Content);
             return JsonConvert.DeserializeObject<List<Session>>(json);
+        }
+
+        /// <summary>
+        /// Reads response content as UTF-8 explicitly. .NET Framework's
+        /// ReadAsStringAsync falls back to the system codepage when the server
+        /// omits a charset, which corrupts non-ASCII project paths (e.g. Cyrillic)
+        /// and makes session matching fail.
+        /// </summary>
+        private static async Task<string> ReadUtf8Async(HttpContent content)
+        {
+            var bytes = await content.ReadAsByteArrayAsync();
+            return Encoding.UTF8.GetString(bytes);
         }
 
         public async Task<Session> CreateSessionAsync(string directory, string title = null)
@@ -61,12 +73,12 @@ namespace OpenCodeStudio.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                var errorBody = await response.Content.ReadAsStringAsync();
+                var errorBody = await ReadUtf8Async(response.Content);
                 throw new HttpRequestException(
                     $"Failed to create session (HTTP {response.StatusCode}): {errorBody}");
             }
 
-            var responseJson = await response.Content.ReadAsStringAsync();
+            var responseJson = await ReadUtf8Async(response.Content);
             return JsonConvert.DeserializeObject<Session>(responseJson);
         }
 
@@ -82,7 +94,7 @@ namespace OpenCodeStudio.Services
             if (!response.IsSuccessStatusCode)
                 throw new HttpRequestException($"Failed to get path: {response.StatusCode}");
 
-            var json = await response.Content.ReadAsStringAsync();
+            var json = await ReadUtf8Async(response.Content);
             return JsonConvert.DeserializeObject<PathInfo>(json);
         }
 
@@ -97,7 +109,7 @@ namespace OpenCodeStudio.Services
             if (!response.IsSuccessStatusCode)
                 throw new HttpRequestException($"Failed to get server path: {response.StatusCode}");
 
-            var json = await response.Content.ReadAsStringAsync();
+            var json = await ReadUtf8Async(response.Content);
             return JsonConvert.DeserializeObject<PathInfo>(json);
         }
 
@@ -113,7 +125,7 @@ namespace OpenCodeStudio.Services
             if (!response.IsSuccessStatusCode)
                 throw new HttpRequestException($"Failed to list projects: {response.StatusCode}");
 
-            var json = await response.Content.ReadAsStringAsync();
+            var json = await ReadUtf8Async(response.Content);
             return JsonConvert.DeserializeObject<List<ProjectInfo>>(json);
         }
 
@@ -129,7 +141,7 @@ namespace OpenCodeStudio.Services
             if (!response.IsSuccessStatusCode)
                 throw new HttpRequestException($"Failed to get current project: {response.StatusCode}");
 
-            var json = await response.Content.ReadAsStringAsync();
+            var json = await ReadUtf8Async(response.Content);
             return JsonConvert.DeserializeObject<ProjectInfo>(json);
         }
     }
