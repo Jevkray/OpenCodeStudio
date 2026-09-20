@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+{theme-style}
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: var(--vs-bg, #1e1e1e);
+        color: var(--vs-text, #cccccc);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        padding: 20px;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+    .error-container {
+        text-align: center;
+        max-width: 420px;
+    }
+    .error-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
+    .error-message {
+        font-size: 14px;
+        line-height: 1.6;
+        margin-bottom: 24px;
+        word-wrap: break-word;
+    }
+    button {
+        background: var(--vs-accent, #0078d4);
+        color: white;
+        border: none;
+        padding: 8px 24px;
+        font-size: 14px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+    button:hover { background: var(--vs-accent-hover, #106ebe); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+</style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">&#9888;</div>
+        <div class="error-message">{message}</div>
+        {retryButton}
+    </div>
+    <script>
+        {retryScript}
+    </script>
+</body>
+</html>

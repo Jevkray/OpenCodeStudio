@@ -1,0 +1,17 @@
+﻿{
+  "$schema": "https://json.schemastore.org/vsix-publish",
+  "categories": [
+    "coding",
+    "visual studio extensions",
+    "other"
+  ],
+  "identity": {
+    "internalName": "OpenCodeStudio"
+  },
+  "overview": "README.md",
+  "priceCategory": "free",
+  "publisher": "Jevkray",
+  "private": false,
+  "qna": true,
+  "repo": "https://github.com/Jevkray/OpenCodeStudio"
+}
