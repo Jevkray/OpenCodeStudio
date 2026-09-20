@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="OpenCodeStudio.7e4a9c31-2b6d-4f58-9a10-3c8e7b5d1f20" Version="1.0.9" Language="en-US" Publisher="jevkray" />
+    <Identity Id="OpenCodeStudio.7e4a9c31-2b6d-4f58-9a10-3c8e7b5d1f20" Version="1.0.10" Language="en-US" Publisher="jevkray" />
     <DisplayName>OpenCode Studio</DisplayName>
-    <Description xml:space="preserve">OpenCode Studio brings the OpenCode AI coding agent right into Visual Studio. Chat with the agent in a WebView2 panel, track your usage (cost, tokens and requests) with beautiful OpenCode-style charts, and keep every session organized by project. Supports VS 2022 and VS 2026.</Description>
+    <Description xml:space="preserve">The OpenCode AI coding agent, natively inside Visual Studio. Full OpenCode web UI in a tool window, shared chat history with the CLI and desktop app, a usage dashboard (cost, tokens, requests) and a first-run import wizard. Everything runs locally. Supports VS 2022 and VS 2026.</Description>
     <Icon>Resources\Icon.png</Icon>
     <PreviewImage>Resources\PreviewImage.png</PreviewImage>
     <Tags>ai;artificial intelligence;coding;assistant;llm;copilot;opencode;webview2;productivity;statistics;analytics</Tags>

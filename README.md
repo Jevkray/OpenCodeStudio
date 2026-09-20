@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>The OpenCode AI coding agent, natively inside Visual Studio.</b><br/>
-  A fast, self-contained tool window with a built-in usage dashboard and a first-run import wizard.
+  A fast, self-contained tool window with a built-in usage dashboard, a first-run import wizard and shared chat history.
 </p>
 
 <p align="center">
@@ -37,26 +37,34 @@
 
 ## Overview
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Jevkray/OpenCodeStudio/main/vs/Resources/PreviewWork.jpg" width="max" alt="OpenCode Studio" />
-</p>
-**OpenCode Studio** embeds the full [OpenCode](https://opencode.ai) web interface into a Visual Studio tool window using WebView2. Unlike a proxy-based integration, it points the browser **straight at the OpenCode server that it launches itself** — fewer moving parts, fewer bugs, and it stays in sync with every OpenCode release.
+**OpenCode Studio** embeds the full [OpenCode](https://opencode.ai) web interface into a Visual Studio tool window using WebView2. Unlike a proxy-based integration, it points the browser **straight at the OpenCode server that it launches itself** - fewer moving parts, fewer bugs, and it stays in sync with every OpenCode release.
 
-Everything runs **locally** on `127.0.0.1`. No account, no telemetry, no data leaves your machine.
+It shares the **same data environment** as the OpenCode CLI and desktop app, so your providers, settings, credentials and chat history are the same everywhere. Everything runs **locally** on `127.0.0.1`. No account, no telemetry, no data leaves your machine.
+
+## What's new
+
+| Version | Highlights |
+|---------|------------|
+| **1.0.10** | Polished documentation, contacts and history-sync guide. |
+| **1.0.9** | Opens the web UI **home** so all projects and chats are visible; stable server port; no more auto-created empty sessions. |
+| **1.0.8** | Fixed chat history loading (correct project-directory encoding in the URL + explicit UTF-8). |
+| **1.0.7** | Chat history syncs with the CLI and desktop app; multiple Visual Studio windows share one OpenCode server. |
+| **1.0.6** | New brand and icon set; first-run import wizard. |
 
 ## Features
 
-| | Feature | Description |
-|---|---------|-------------|
-| 🧩 | **Native web UI** | The complete OpenCode interface (projects, sessions, tabs, themes) rendered directly — no shim, no injected scripts. |
-| 🗂️ | **Per-project sessions** | Detects your solution / Git root and opens the matching OpenCode session automatically. |
-| 📊 | **Usage dashboard** | A dedicated window with cost, tokens, requests and OpenCode-style charts, with live refresh. |
-| 📥 | **First-run import wizard** | Detects every OpenCode installation (CLI, Desktop, custom folder) and imports settings, themes, credentials and chat history in one click. |
-| 🔒 | **Isolated environment** | Runs in its own `%LOCALAPPDATA%\OpenCodeStudio` environment, so your global CLI/Desktop setup is never modified. |
-| 🔁 | **Auto-reconnect** | If the server drops, the window shows a progress page and restores the session by itself. |
-| 🎨 | **VS-aware chrome** | Loading and error pages follow your Visual Studio color theme. |
-| 🧾 | **File logging** | Diagnostics written to `%LOCALAPPDATA%\OpenCodeStudio\logs\opencode-studio.log`. |
-| ✅ | **VS 2022 & 2026** | One VSIX for both. |
+| Feature | Description |
+|---------|-------------|
+| Native web UI | The complete OpenCode interface (projects, sessions, tabs, themes) rendered directly - no shim, no injected scripts. |
+| Shared history | Uses the same OpenCode data as the CLI and desktop app, so every chat is available everywhere and across multiple Visual Studio windows. |
+| All chats visible | Opens the web UI home, listing every project and session - just like the desktop app. |
+| Per-project sessions | Detects your solution / Git root and remembers the last project so history never appears to reset. |
+| Usage dashboard | A dedicated window with cost, tokens, requests and OpenCode-style charts, with live refresh. |
+| First-run import wizard | Detects every OpenCode installation (CLI, Desktop, custom folder) and imports settings, themes, credentials and chat history in one click. |
+| Auto-reconnect | If the server drops, the window shows a progress page and restores the session by itself. |
+| VS-aware chrome | Loading and error pages follow your Visual Studio color theme. |
+| File logging | Diagnostics written to `%LOCALAPPDATA%\OpenCodeStudio\logs\opencode-studio.log`. |
+| VS 2022 & 2026 | One VSIX for both. |
 
 ## Installation
 
@@ -76,34 +84,32 @@ Everything runs **locally** on `127.0.0.1`. No account, no telemetry, no data le
 ## Getting started
 
 ```text
-  View   → Other Windows → OpenCode Studio      (the agent)
-  Tools  → OpenCode Studio Usage Statistics     (cost & tokens)
-  Tools  → OpenCode Studio Import Settings...   (setup wizard)
+  View   -> Other Windows -> OpenCode Studio      (the agent)
+  Tools  -> OpenCode Studio Usage Statistics     (cost & tokens)
+  Tools  -> OpenCode Studio Import Settings...   (setup wizard)
 ```
 
-On the **first launch** the setup wizard appears automatically. It scans your machine for OpenCode data and lets you pull in whatever you want:
+The tool window opens the OpenCode web UI home. From there you can pick any project, open an existing chat or start a new session.
 
-```text
-  ╭──────────────────────────────────────────────────────────────╮
-  │  Import from                                                 │
-  ├──────────────────────────────────────────────────────────────┤
-  │  ■ OpenCode CLI / Desktop (global)   opencode.json, auth, db │
-  │  ■ OpenCode Studio environment        currently in use        │
-  │  ■ OpenCode Desktop                   settings, drafts        │
-  │  ■ Current project (.opencode)        project-local config    │
-  │  ■ Custom folder...                   a backup or another PC  │
-  ╰──────────────────────────────────────────────────────────────╯
-```
+## Syncing chat history
 
-Every overwrite is backed up with a `.bak-<timestamp>` suffix, so nothing is ever lost. You can re-open the wizard any time from **Tools**.
+OpenCode stores every session **against the project directory it was created in**. Because OpenCode Studio shares the same data environment as the CLI and desktop app, all chats are already available - but they are grouped by project path.
+
+If a project lives at a **different absolute path** than when its chats were created (another drive letter, another user name, a moved or renamed folder), those sessions stay grouped under the original path and will not appear next to the project in its new location. To bring the full history together:
+
+1. Open each project at the **same absolute path** it originally used (for example `C:\Users\<you>\source\repos\MyApp`).
+2. If the path changed, move the project back, or import the old data through **Tools → OpenCode Studio Import Settings...** and point it at the folder that contains the original `opencode.db`.
+3. Reopen the tool window - the sessions appear under the matching project.
+
+Once the project paths line up, **all chats synchronize** between the CLI, the desktop app and every Visual Studio window.
 
 ## Usage statistics
 
-Open **Tools → OpenCode Studio Usage Statistics** for a local dashboard built from the OpenCode API — no external services:
+Open **Tools → OpenCode Studio Usage Statistics** for a local dashboard built from the OpenCode API - no external services:
 
-- **KPI cards** — total cost, tokens, sessions and requests.
-- **Cost by day** — a smooth area chart.
-- **Tokens by type** — input / output / reasoning / cache in a donut.
+- **KPI cards** - total cost, tokens, sessions and requests.
+- **Cost by day** - a smooth area chart.
+- **Tokens by type** - input / output / reasoning / cache in a donut.
 - **Cost by model** and **cost per request** for the current session.
 - **Session table** with model, agent, tokens and cost.
 
@@ -122,7 +128,7 @@ OpenCode Studio keeps a deliberately small, decoupled core.
   │    └── ProcessBinding             dies with Visual Studio    │
   ├──────────────────────────────────────────────────────────────┤
   │  OpenCodeToolWindowControl        WebView2 host              │
-  │    └── navigates to http://127.0.0.1:<port>/{dir}/session    │
+  │    └── opens http://127.0.0.1:<port>/ (the web UI home)      │
   ├──────────────────────────────────────────────────────────────┤
   │  UsageStatsWindow                 WebView2 dashboard         │
   │  FirstRunWindow                   import wizard              │
@@ -133,15 +139,15 @@ OpenCode Studio keeps a deliberately small, decoupled core.
 **Design principles**
 
 - **No proxy layer.** WebView2 talks to the real server origin, so the UI is always authentic and update-proof.
-- **Isolated data.** OpenCode runs with its own `XDG_*` directories under `%LOCALAPPDATA%\OpenCodeStudio\opencode`.
-- **Clean service boundaries.** Server lifecycle, session API, monitoring and import are separate, testable services.
+- **Shared data.** OpenCode runs in your default environment, so history and settings stay in sync with the CLI and desktop app.
+- **One server per machine.** A small registry file lets every Visual Studio window reuse the same OpenCode server, keeping sessions and live agent state in sync.
 - **Local by default.** Binding to loopback, no outbound calls except to the providers you configured.
 
 ## Requirements
 
 | Component | Version |
 |-----------|---------|
-| Visual Studio | 2022 (17.0) – 2026 |
+| Visual Studio | 2022 (17.0) - 2026 |
 | OpenCode CLI | installed and on `PATH` |
 | .NET SDK (build from source) | .NET 10 |
 | WebView2 Runtime | preinstalled with Windows 10/11 and VS |
@@ -165,6 +171,15 @@ OpenCode Studio is **local-first**:
 - credentials are stored by OpenCode itself in your own environment;
 - the extension sends no telemetry and has no analytics;
 - the usage dashboard reads from your local server.
+
+## Contacts & Support
+
+| | |
+|---|---|
+| Telegram | [@eugenekray](https://t.me/eugenekray) |
+| Email | [krasovskyworks@gmail.com](mailto:krasovskyworks@gmail.com) |
+| Support the project | [boosty.to/jevkray](https://boosty.to/jevkray) |
+| Issues & ideas | [GitHub Issues](https://github.com/Jevkray/OpenCodeStudio/issues) |
 
 ## License
 

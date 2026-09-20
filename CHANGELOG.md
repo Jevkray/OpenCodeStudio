@@ -3,6 +3,13 @@
 All notable changes to **OpenCode Studio** are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.10] - 2026-09-20
+
+### Added
+- Reworked bilingual documentation (English and Russian) with a preview screenshot, feature overview and contacts (Telegram, email, Boosty).
+- A dedicated **Syncing chat history** guide: chats are grouped by project path, so matching the original project paths makes the full history appear everywhere.
+- Marketplace description with a preview section.
+
 ## [1.0.9] - 2026-09-20
 
 ### Changed
@@ -52,6 +59,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 - Initial public release: OpenCode web UI embedded in a Visual Studio tool window.
 
+[1.0.10]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.10
 [1.0.9]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.9
 [1.0.8]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.8
 [1.0.7]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.7
