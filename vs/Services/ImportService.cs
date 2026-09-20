@@ -51,12 +51,14 @@ namespace OpenCodeStudio.Services
     public sealed class ImportService
     {
         private readonly OpenCodeEnvironment _env;
-        private readonly OpenCodeEnvironment _global;
 
         public ImportService(OpenCodeEnvironment env = null)
         {
-            _env = env ?? OpenCodeEnvironment.ForStudio();
-            _global = OpenCodeEnvironment.Global();
+            // OpenCode Studio now shares the user's default OpenCode
+            // environment with the CLI and the desktop app, so history and
+            // settings stay in sync everywhere. The wizard therefore targets the
+            // shared (global) environment; custom folders can still be imported.
+            _env = env ?? OpenCodeEnvironment.Global();
         }
 
         public OpenCodeEnvironment Data => _env;
@@ -64,10 +66,6 @@ namespace OpenCodeStudio.Services
         public List<ImportSource> DetectSources(string customPath = null, string solutionDir = null)
         {
             var sources = new List<ImportSource>();
-
-            var global = BuildGlobalSource();
-            if (global.Items.Any(i => i.Found))
-                sources.Add(global);
 
             sources.Add(BuildStudioSource());
 
@@ -89,33 +87,12 @@ namespace OpenCodeStudio.Services
             return sources;
         }
 
-        /// <summary>The user's default CLI / desktop environment - importable into Studio.</summary>
-        private ImportSource BuildGlobalSource()
-        {
-            var s = new ImportSource
-            {
-                Name = "OpenCode CLI / Desktop (global)",
-                Kind = "cli",
-                RootPath = _global.ConfigDir,
-                Summary = $"Version {DetectCliVersion() ?? "unknown"} \u00b7 import into OpenCode Studio's own environment"
-            };
-
-            Add(s, ImportKind.Settings, "Settings (opencode.json)", _global.ConfigFile, _env.ConfigFile, false, DescribeConfig);
-            Add(s, ImportKind.Commands, "Custom commands", _global.CommandsDir, _env.CommandsDir, true, CountFiles);
-            Add(s, ImportKind.Theme, "TUI / theme (tui.json)", _global.TuiFile, _env.TuiFile, false, DescribeTui);
-            Add(s, ImportKind.Auth, "Credentials (auth.json)", _global.AuthFile, _env.AuthFile, false, DescribeAuth);
-            Add(s, ImportKind.History, "Chat history (opencode.db)", _global.DatabaseFile, _env.DatabaseFile, false, DescribeDb);
-            Add(s, ImportKind.State, "State (model.json, prompt-history)", _global.StateDir, _env.StateDir, true, CountFiles);
-
-            return s;
-        }
-
-        /// <summary>OpenCode Studio's private environment (already active).</summary>
+        /// <summary>The shared OpenCode environment (already active).</summary>
         private ImportSource BuildStudioSource()
         {
             var s = new ImportSource
             {
-                Name = "OpenCode Studio environment",
+                Name = "OpenCode environment (shared with CLI & Desktop)",
                 Kind = "studio",
                 RootPath = _env.ConfigDir,
                 IsActive = true,

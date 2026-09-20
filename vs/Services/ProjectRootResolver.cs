@@ -25,26 +25,52 @@ namespace OpenCodeStudio.Services
             // Try git root from solution directory (higher priority)
             string gitRoot = FindGitRoot(solutionDir);
             if (!string.IsNullOrEmpty(gitRoot))
-            {
-                return NormalizePath(gitRoot);
-            }
+                return Remember(NormalizePath(gitRoot));
 
             // Fallback to solution directory
             if (!string.IsNullOrEmpty(solutionDir))
-            {
-                return NormalizePath(solutionDir);
-            }
+                return Remember(NormalizePath(solutionDir));
 
             // Try git root from user profile directory
             gitRoot = FindGitRoot(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
             if (!string.IsNullOrEmpty(gitRoot))
-            {
-                return NormalizePath(gitRoot);
-            }
+                return Remember(NormalizePath(gitRoot));
+
+            // No solution is open. Reuse the last known project so the chat
+            // history does not appear to reset when a solution is closed.
+            var remembered = ReadRememberedRoot();
+            if (!string.IsNullOrEmpty(remembered) && Directory.Exists(remembered))
+                return remembered;
 
             // Use user documents directory as last resort
             return NormalizePath(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
         }
+
+        private static string Remember(string root)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(root))
+                {
+                    Directory.CreateDirectory(OpenCodeEnvironment.StudioDir);
+                    File.WriteAllText(LastRootPath, root);
+                }
+            }
+            catch { }
+            return root;
+        }
+
+        private static string ReadRememberedRoot()
+        {
+            try
+            {
+                return File.Exists(LastRootPath) ? File.ReadAllText(LastRootPath).Trim() : null;
+            }
+            catch { return null; }
+        }
+
+        private static string LastRootPath => Path.Combine(
+            OpenCodeEnvironment.StudioDir, "last-project.txt");
 
         private string GetSolutionDirectory()
         {

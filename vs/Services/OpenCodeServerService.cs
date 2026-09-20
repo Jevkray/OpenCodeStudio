@@ -19,6 +19,7 @@ namespace OpenCodeStudio.Services
         private HttpClient _httpClient;
         private ServerInfo _serverInfo;
         private ConnectionState _state = ConnectionState.Disconnected;
+        private bool _ownsProcess;
 
         public ServerInfo ServerInfo => _serverInfo;
         public ConnectionState State => _state;
@@ -33,6 +34,18 @@ namespace OpenCodeStudio.Services
         {
             Stop();
             SetState(ConnectionState.Connecting);
+
+            // Reuse an OpenCode server that is already running - for example one
+            // started by another Visual Studio window, or the OpenCode desktop
+            // app. Sharing a single server keeps every client on the same live
+            // session/event stream, so chats stay in sync everywhere.
+            if (await TryAdoptSharedServerAsync())
+            {
+                Log.Info($"Reusing existing OpenCode server at {_serverInfo.BaseUrl}");
+                SetState(ConnectionState.Connected);
+                return true;
+            }
+
             Log.Info($"Starting OpenCode server (cwd={projectRoot})");
 
             try
@@ -61,9 +74,9 @@ namespace OpenCodeStudio.Services
                 // client always talks to a loopback-only server, so we drop it.
                 try { psi.EnvironmentVariables.Remove("OPENCODE_SERVER_PASSWORD"); } catch { }
 
-                // Run the server inside OpenCode Studio's own isolated
-                // environment so it never mutates the user's CLI/desktop setup.
-                OpenCodeEnvironment.ForStudio().ApplyTo(psi);
+                // NOTE: we deliberately do NOT override XDG_* here. Using the
+                // user's default OpenCode environment keeps history, settings and
+                // credentials in sync with the OpenCode CLI and Desktop app.
 
                 // .cmd/.bat shims cannot be started directly with UseShellExecute=false,
                 // so launch them through cmd.exe.
@@ -86,6 +99,7 @@ namespace OpenCodeStudio.Services
                     return false;
                 }
 
+                _ownsProcess = true;
                 ProcessBinding.BindToCurrentProcess(_process);
 
                 var resolvedInfo = await ResolveServerUrlAsync(_process, ConnectTimeoutMs);
@@ -98,6 +112,7 @@ namespace OpenCodeStudio.Services
 
                 _serverInfo = resolvedInfo;
                 Log.Info($"Server listening on {resolvedInfo.BaseUrl}");
+                WriteSharedRegistry(resolvedInfo);
 
                 var healthy = await WaitForHealthAsync(ConnectTimeoutMs);
                 if (healthy)
@@ -139,19 +154,93 @@ namespace OpenCodeStudio.Services
 
         public void Stop()
         {
-            if (_process != null)
-                Log.Info("Stopping OpenCode server");
             _httpClient?.Dispose();
             _httpClient = null;
             _serverInfo = null;
 
-            if (_process != null && !_process.HasExited)
+            // Only kill the server if this instance started it. When we merely
+            // adopted a server started elsewhere, leave it running.
+            if (_ownsProcess && _process != null)
             {
-                try { _process.Kill(); _process.WaitForExit(5000); } catch { }
+                Log.Info("Stopping OpenCode server");
+                if (!_process.HasExited)
+                {
+                    try { _process.Kill(); _process.WaitForExit(5000); } catch { }
+                }
                 _process.Dispose();
+                RemoveSharedRegistry();
             }
             _process = null;
+            _ownsProcess = false;
             SetState(ConnectionState.Disconnected);
+        }
+
+        /// <summary>
+        /// Tries to reuse a server recorded by another OpenCode Studio instance
+        /// (other Visual Studio windows). Returns true when a healthy server was
+        /// found and adopted.
+        /// </summary>
+        private async Task<bool> TryAdoptSharedServerAsync()
+        {
+            var info = ReadSharedRegistry();
+            if (info == null) return false;
+
+            try
+            {
+                using (var client = CreateHttpClient(info))
+                {
+                    client.Timeout = TimeSpan.FromSeconds(3);
+                    var response = await client.GetAsync("/global/health");
+                    if (!response.IsSuccessStatusCode) return false;
+                    var json = await response.Content.ReadAsStringAsync();
+                    var health = JsonConvert.DeserializeObject<HealthInfo>(json);
+                    if (health?.Healthy != true) return false;
+                }
+            }
+            catch { return false; }
+
+            _serverInfo = info;
+            _process = null;
+            _ownsProcess = false;
+            await InitializeHttpClientAsync();
+            return true;
+        }
+
+        private static string RegistryPath => Path.Combine(
+            OpenCodeEnvironment.StudioDir, "server.json");
+
+        private static void WriteSharedRegistry(ServerInfo info)
+        {
+            try
+            {
+                Directory.CreateDirectory(OpenCodeEnvironment.StudioDir);
+                var record = new SharedServerRecord
+                {
+                    Host = info.Host,
+                    Port = info.Port,
+                    Pid = System.Diagnostics.Process.GetCurrentProcess().Id
+                };
+                File.WriteAllText(RegistryPath, JsonConvert.SerializeObject(record));
+            }
+            catch { }
+        }
+
+        private static ServerInfo ReadSharedRegistry()
+        {
+            try
+            {
+                if (!File.Exists(RegistryPath)) return null;
+                var record = JsonConvert.DeserializeObject<SharedServerRecord>(
+                    File.ReadAllText(RegistryPath));
+                if (record == null || record.Port <= 0) return null;
+                return new ServerInfo(string.IsNullOrEmpty(record.Host) ? "127.0.0.1" : record.Host, record.Port);
+            }
+            catch { return null; }
+        }
+
+        private static void RemoveSharedRegistry()
+        {
+            try { if (File.Exists(RegistryPath)) File.Delete(RegistryPath); } catch { }
         }
 
         public void UpdateConnectionState(bool connected)
@@ -325,5 +414,13 @@ namespace OpenCodeStudio.Services
 
             return null;
         }
+    }
+
+    /// <summary>Record of a running OpenCode server shared between clients.</summary>
+    internal sealed class SharedServerRecord
+    {
+        public string Host { get; set; }
+        public int Port { get; set; }
+        public int Pid { get; set; }
     }
 }
