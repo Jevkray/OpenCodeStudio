@@ -41,6 +41,12 @@
 
 It shares the **same data environment** as the OpenCode CLI and desktop app, so your providers, settings, credentials and chat history are the same everywhere. Everything runs **locally** on `127.0.0.1`. No account, no telemetry, no data leaves your machine.
 
+## Preview
+
+![OpenCode Studio running inside Visual Studio](https://raw.githubusercontent.com/Jevkray/OpenCodeStudio/main/vs/Resources/PreviewWork.jpg)
+
+*OpenCode Studio inside Visual Studio: the agent chat next to your solution, with the session panel showing model, provider, token usage, cost, last activity and the context breakdown.*
+
 ## What's new
 
 | Version | Highlights |
