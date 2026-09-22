@@ -45,20 +45,6 @@ namespace OpenCodeStudio
         private SpendMonitor _spendMonitor;
         private SpendSettings _spendSettings;
         private bool _loginInProgress;
-        private bool _loginAttempted;
-
-        /// <summary>Запрос пользователя открыть окно статистики.</summary>
-        public event Action UsageRequested;
-
-        private Action _usageHandler;
-
-        /// <summary>Назначает единственный обработчик UsageRequested, снимая прежний.</summary>
-        public void SetUsageRequestedHandler(Action handler)
-        {
-            if (_usageHandler != null) UsageRequested -= _usageHandler;
-            _usageHandler = handler;
-            UsageRequested += handler;
-        }
 
         // Токен жизни окна: отменяет длительные операции (ожидание логина) при закрытии.
         private readonly System.Threading.CancellationTokenSource _lifetimeCts = new System.Threading.CancellationTokenSource();
@@ -257,7 +243,11 @@ namespace OpenCodeStudio
         private void OnNavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
         {
             if (!e.IsSuccess)
+            {
                 Debug.WriteLine($"Navigation failed: {e.WebErrorStatus}");
+                return;
+            }
+            PushUsageState();
         }
 
         private async Task WaitServerAsync()
@@ -498,13 +488,6 @@ namespace OpenCodeStudio
         {
             if (_spendSettings == null || !_spendSettings.EnableInjection) return;
 
-            if (!_loginAttempted && ConsoleSessionStore.Load() == null)
-            {
-                // Флаг выставит сам OnSpendAuthRequired; иначе guard его же и отсечёт.
-                OnSpendAuthRequired();
-                return; // логин запустит монитор после успеха
-            }
-
             if (_spendMonitor != null) return;
 
             _spendMonitor = new SpendMonitor(_spendSettings);
@@ -525,7 +508,7 @@ namespace OpenCodeStudio
                     if (core == null) return;
                     LatestSnapshot = s;
                     SnapshotUpdated?.Invoke(s);
-                    UsageInjector.Push(core, UsageInjector.BuildPayload(s, _spendSettings?.ShowLimits ?? true));
+                    PushUsageState();
                 }
                 catch (Exception ex)
                 {
@@ -537,12 +520,27 @@ namespace OpenCodeStudio
 
         private void OnSpendAuthRequired()
         {
-            // Одна попытка авто-входа, пока монитор сам не очистит протухшую cookie.
-            if (_loginInProgress || _loginAttempted) return;
-            _loginAttempted = true;
+            // Авто-вход больше не запускаем: показываем состояние входа в поповере.
 #pragma warning disable VSSDK007
-            _ = ThreadHelper.JoinableTaskFactory.RunAsync(() => BeginConsoleLoginAsync());
+            _ = ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+            {
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                PushUsageState();
+            });
 #pragma warning restore VSSDK007
+        }
+
+        /// <summary>Отправляет текущее состояние использования в веб-UI (UI-поток).</summary>
+        private void PushUsageState()
+        {
+            try
+            {
+                var core = webView?.CoreWebView2;
+                if (core == null) return;
+                var state = ConsoleSessionStore.Load() == null ? "login" : (LatestSnapshot != null ? "ready" : "loading");
+                UsageInjector.Push(core, UsageInjector.BuildPayload(state, LatestSnapshot, _spendSettings?.ShowLimits ?? true));
+            }
+            catch (Exception ex) { Services.Log.Error("Failed to push usage state", ex); }
         }
 
         private async Task BeginConsoleLoginAsync()
@@ -563,13 +561,13 @@ namespace OpenCodeStudio
                     return;
                 }
 
-                // Вход удался: сбрасываем флаг, чтобы авто-вход сработал при новом истечении.
-                _loginAttempted = false;
-
+                // Вход удался.
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 var home = _serverController?.GetHomeUrl();
                 if (home != null && webView?.CoreWebView2 != null)
                     webView.CoreWebView2.Navigate(home);
+
+                PushUsageState();
 
                 _spendMonitor?.Stop();
                 _spendMonitor = null;
@@ -595,9 +593,11 @@ namespace OpenCodeStudio
         private void OnWebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
             var message = e.TryGetWebMessageAsString();
-            if (message == "open-usage")
+            if (message == "login")
             {
-                UsageRequested?.Invoke();
+#pragma warning disable VSSDK007
+                _ = ThreadHelper.JoinableTaskFactory.RunAsync(() => BeginConsoleLoginAsync());
+#pragma warning restore VSSDK007
                 return;
             }
             if (message == "retry" && !_retryDisabled)

@@ -3,6 +3,13 @@
 All notable changes to **OpenCode Studio** are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.1] - 2026-09-22
+
+### Changed
+- The usage button now sits in the OpenCode prompt footer, left of the context button, matching the native styling.
+- Clicking it opens an in-panel popover with sign-in, loading and the usage infographics instead of a separate window.
+- The panel follows the OpenCode theme (CSS variables) and refreshes live.
+
 ## [1.1.0] - 2026-09-22
 
 ### Added
@@ -68,6 +75,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 - Initial public release: OpenCode web UI embedded in a Visual Studio tool window.
 
+[1.1.1]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.1
 [1.1.0]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.0
 [1.0.10]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.10
 [1.0.9]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.9

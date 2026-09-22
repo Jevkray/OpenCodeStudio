@@ -69,6 +69,7 @@
     <EmbeddedResource Include="Resources\LoadingPage.html" />
     <EmbeddedResource Include="Resources\StatsPage.html" />
     <EmbeddedResource Include="Resources\UsagePage.html" />
+    <EmbeddedResource Include="Resources\UsageInjector.js" />
   </ItemGroup>
 
   <ItemGroup>

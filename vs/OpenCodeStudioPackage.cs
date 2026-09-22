@@ -110,7 +110,6 @@ namespace OpenCodeStudio
                 _toolWindowControl = toolWindow.Control;
                 toolWindow.Control.SetServerController(_serverController);
                 toolWindow.Control.SetSpendSettings(GetSpendSettings());
-                toolWindow.Control.SetUsageRequestedHandler(() => _ = ShowUsageWindowAsync());
 
                 await toolWindow.Control.StartAsync();
             }
@@ -126,7 +125,6 @@ namespace OpenCodeStudio
                 _toolWindowControl = toolWindow.Control;
                 toolWindow.Control.SetServerController(_serverController);
                 toolWindow.Control.SetSpendSettings(GetSpendSettings());
-                toolWindow.Control.SetUsageRequestedHandler(() => _ = ShowUsageWindowAsync());
                 await toolWindow.Control.StartAsync();
             }
         }

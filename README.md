@@ -26,6 +26,7 @@
 
 ## 🆕 What's new
 
+- **1.1.1** - Usage button in the OpenCode footer with an in-panel popover (sign-in, loading, infographics).
 - **1.1.0** - Usage overlay: remaining Go limits and today's spend right in the OpenCode panel, plus a usage dashboard window.
 
 ## ✨ Why OpenCode Studio?
