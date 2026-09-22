@@ -21,6 +21,7 @@
 
 ## 🆕 What's new
 
+- **1.1.4** - Sign-in reliably returns to the app (event-driven cookie capture).
 - **1.1.3** - Sign-in returns to the app and opens the usage panel automatically.
 - **1.1.2** - Popover clamped to the window; sign-in completes in-panel (OAuth kept in the embedded browser).
 - **1.1.1** - Usage button in the OpenCode footer with an in-panel popover (sign-in, loading, infographics).

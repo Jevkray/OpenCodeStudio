@@ -3,6 +3,11 @@
 All notable changes to **OpenCode Studio** are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.4] - 2026-09-22
+
+### Fixed
+- Sign-in now uses an event-driven capture (like the OpenCodeSpend app): the return navigation to opencode.ai is cancelled and the session cookie is captured immediately, then the app is restored and the monitor restarted.
+
 ## [1.1.3] - 2026-09-22
 
 ### Fixed
@@ -87,6 +92,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 - Initial public release: OpenCode web UI embedded in a Visual Studio tool window.
 
+[1.1.4]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.4
 [1.1.3]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.3
 [1.1.2]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.2
 [1.1.1]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.1
