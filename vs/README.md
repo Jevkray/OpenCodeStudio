@@ -21,11 +21,7 @@
 
 ## 🆕 What's new
 
-- **1.1.4** - Sign-in reliably returns to the app (event-driven cookie capture).
-- **1.1.3** - Sign-in returns to the app and opens the usage panel automatically.
-- **1.1.2** - Popover clamped to the window; sign-in completes in-panel (OAuth kept in the embedded browser).
-- **1.1.1** - Usage button in the OpenCode footer with an in-panel popover (sign-in, loading, infographics).
-- **1.1.0** - Usage overlay with remaining Go limits and today's spend in the OpenCode panel, plus a usage dashboard window.
+- **1.1.0** - Statistics button in the OpenCode panel: open your profile and check real usage without leaving Visual Studio.
 
 ## ✨ Highlights
 
@@ -33,6 +29,7 @@
 - 🔄 **Shared history** — the same chats as the CLI and desktop app, across every Visual Studio window.
 - 🗂️ **All chats visible** — opens the web UI home, listing every project and session.
 - 📊 **Usage dashboard** — cost, tokens and requests with OpenCode-style charts.
+- 📈 **Profile & usage in one click** - the statistics button opens your OpenCode console inside the panel, so you can check real spend and limits without switching to a browser.
 - 📥 **First-run wizard** — import settings, themes, credentials and history in one click.
 - 🔁 **Auto-reconnect** — recovers the session by itself if the server drops.
 - 🔒 **Local-first** — loopback only, zero telemetry.

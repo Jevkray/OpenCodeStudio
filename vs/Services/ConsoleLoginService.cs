@@ -13,15 +13,23 @@ namespace OpenCodeStudio.Services
     internal static class ConsoleLoginService
     {
         public const string Home = "https://opencode.ai";
+        public const string AuthHome = "https://auth.opencode.ai";
         public const string LoginUrl = "https://opencode.ai/console/login";
 
-        /// <summary>Собирает cookie для домашнего домена в строку "name=value; ...".</summary>
+        /// <summary>Собирает cookie домашнего домена и auth-поддомена в "name=value; ...".</summary>
         public static async Task<string> ReadCookieAsync(CoreWebView2 core)
         {
-            var cookies = await core.CookieManager.GetCookiesAsync(Home);
             var parts = new List<string>();
-            foreach (var c in cookies)
-                parts.Add(c.Name + "=" + c.Value);
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var url in new[] { Home, AuthHome })
+            {
+                var cookies = await core.CookieManager.GetCookiesAsync(url);
+                foreach (var c in cookies)
+                {
+                    if (string.IsNullOrEmpty(c.Name) || !seen.Add(c.Name)) continue;
+                    parts.Add(c.Name + "=" + c.Value);
+                }
+            }
             return parts.Count == 0 ? null : string.Join("; ", parts);
         }
 

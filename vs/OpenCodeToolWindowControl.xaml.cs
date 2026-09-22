@@ -46,6 +46,7 @@ namespace OpenCodeStudio
         private SpendSettings _spendSettings;
         private bool _loginInProgress;
         private bool _loginMode;
+        private bool _loginReturned;
         private bool _autoOpenAfterLogin;
         private System.Threading.Tasks.TaskCompletionSource<bool> _loginTcs;
 
@@ -257,11 +258,10 @@ namespace OpenCodeStudio
             if (!_loginMode) return;
             var u = e.Uri ?? "";
             if (!ConsoleLoginService.IsReturnedToApp(u)) return;
-            // opencode вернул нас на свою страницу — вход выполнен. Отменяем загрузку
-            // консоли и сразу забираем cookie.
-            e.Cancel = true;
-            _loginMode = false;
-            _ = FinishConsoleCaptureAsync();
+            // Вход выполнен: opencode вернул нас на свою страницу. НЕ отменяем загрузку —
+            // именно ответ этой навигации ставит сессионную cookie. Захват делаем в NavigationCompleted.
+            Services.Log.Info("Console login: returned to opencode.ai, waiting for cookie");
+            _loginReturned = true;
         }
 
         private void OnNavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
@@ -270,6 +270,12 @@ namespace OpenCodeStudio
             {
                 Debug.WriteLine($"Navigation failed: {e.WebErrorStatus}");
                 return;
+            }
+            // Вернулись на opencode.ai — забираем cookie именно после загрузки ответа.
+            if (_loginMode && _loginReturned)
+            {
+                _loginReturned = false;
+                _ = FinishConsoleCaptureAsync();
             }
             PushUsageState(_autoOpenAfterLogin);
             _autoOpenAfterLogin = false;
@@ -511,6 +517,8 @@ namespace OpenCodeStudio
         /// <summary>Запускает фоновый монитор расхода, если инъекция включена.</summary>
         private void StartSpendMonitor()
         {
+            // временно: парсинг отключён, кнопка только переключает консоль
+            return;
             if (_spendSettings == null || !_spendSettings.EnableInjection) return;
 
             if (_spendMonitor != null) return;
@@ -574,20 +582,39 @@ namespace OpenCodeStudio
             {
                 var core = webView?.CoreWebView2;
                 if (core == null) { _loginTcs?.TrySetResult(false); return; }
-                var cookie = await ConsoleLoginService.ReadCookieAsync(core);
-                if (string.IsNullOrEmpty(cookie))
+
+                for (int attempt = 1; attempt <= 10; attempt++)
                 {
-                    await Task.Delay(900); // сессия может записаться чуть позже
-                    cookie = await ConsoleLoginService.ReadCookieAsync(core);
+                    var cookie = await ConsoleLoginService.ReadCookieAsync(core);
+                    if (string.IsNullOrEmpty(cookie))
+                    {
+                        await Task.Delay(1000);
+                        continue;
+                    }
+
+                    var names = string.Join(",", cookie.Split(';')
+                        .Select(p => p.Split('=')[0].Trim())
+                        .Where(n => n.Length > 0));
+                    Services.Log.Info($"Console login: attempt {attempt}, cookie names = {names}");
+
+                    bool ok;
+                    try { ok = await new SpendClient(cookie).ResolveOrgAsync(System.Threading.CancellationToken.None); }
+                    catch (ConsoleAuthException) { ok = false; }
+                    catch (Exception ex) { Services.Log.Warn("Console login: org check error: " + ex.Message); ok = false; }
+
+                    if (ok)
+                    {
+                        ConsoleSessionStore.Save(cookie);
+                        Services.Log.Info("Console login: valid session cookie saved");
+                        _loginTcs?.TrySetResult(true);
+                        return;
+                    }
+
+                    Services.Log.Warn($"Console login: cookie not valid yet (attempt {attempt})");
+                    await Task.Delay(1500);
                 }
-                if (!string.IsNullOrEmpty(cookie))
-                {
-                    ConsoleSessionStore.Save(cookie);
-                    Services.Log.Info("Console login: cookie captured");
-                    _loginTcs?.TrySetResult(true);
-                    return;
-                }
-                Services.Log.Warn("Console login: returned but no cookie found");
+
+                Services.Log.Warn("Console login: no valid cookie after retries");
                 _loginTcs?.TrySetResult(false);
             }
             catch (Exception ex)
@@ -605,6 +632,7 @@ namespace OpenCodeStudio
             {
                 _loginTcs = new System.Threading.Tasks.TaskCompletionSource<bool>();
                 _loginMode = true;
+                _loginReturned = false;
                 await ShowLoadingPageAsync("Вход в OpenCode Console...");
                 var core = webView?.CoreWebView2;
                 if (core != null)
@@ -658,6 +686,32 @@ namespace OpenCodeStudio
         private void OnWebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
             var message = e.TryGetWebMessageAsString();
+            if (message == "toggle-console")
+            {
+#pragma warning disable VSSDK007
+                _ = ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+                {
+                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                    try
+                    {
+                        var core = webView?.CoreWebView2;
+                        if (core == null) return;
+                        var current = core.Source ?? "";
+                        if (current.StartsWith("https://opencode.ai", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var home = _serverController?.GetHomeUrl();
+                            if (home != null) core.Navigate(home);
+                        }
+                        else
+                        {
+                            core.Navigate("https://opencode.ai/console");
+                        }
+                    }
+                    catch (Exception ex) { Services.Log.Error("toggle-console failed", ex); }
+                });
+#pragma warning restore VSSDK007
+                return;
+            }
             if (message == "login")
             {
 #pragma warning disable VSSDK007

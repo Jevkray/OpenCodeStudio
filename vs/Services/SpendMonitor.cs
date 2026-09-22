@@ -146,8 +146,8 @@ namespace OpenCodeStudio.Services
                 }
                 catch (ConsoleAuthException)
                 {
-                    // Cookie протухла — чистим её, чтобы UI запустил повторный вход.
-                    ConsoleSessionStore.Clear();
+                    // Временно не чистим cookie — только логируем для диагностики.
+                    Log.Warn("Console session rejected (401) — keeping cookie for diagnostics");
                     // Сбрасываем состояние: возможно, пользователь уже перелогинился.
                     cookie = null;
                     client = null;
@@ -155,7 +155,7 @@ namespace OpenCodeStudio.Services
                     rows = new List<SpendRow>();
                     lastLimits = lastHistory = DateTime.MinValue;
                     AuthRequired?.Invoke();
-                    try { await Task.Delay(15000, ct); }
+                    try { await Task.Delay(60000, ct); }
                     catch (OperationCanceledException) { break; }
                 }
                 catch (Exception ex)

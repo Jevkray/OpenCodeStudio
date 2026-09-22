@@ -3,38 +3,21 @@
 All notable changes to **OpenCode Studio** are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.1.4] - 2026-09-22
-
-### Fixed
-- Sign-in now uses an event-driven capture (like the OpenCodeSpend app): the return navigation to opencode.ai is cancelled and the session cookie is captured immediately, then the app is restored and the monitor restarted.
-
-## [1.1.3] - 2026-09-22
-
-### Fixed
-- Sign-in now always returns to the app and restarts the monitor, and the usage popover opens automatically after login.
-- Sign-in is detected both by a valid session cookie and by returning to opencode.ai; detailed step logging was added to the extension log.
-
-## [1.1.2] - 2026-09-22
-
-### Fixed
-- The usage popover is now clamped to the window, so it no longer drifts off-screen.
-- Sign-in completes inside the panel: OAuth windows are kept in the embedded browser and the session is detected by a valid cookie, then the panel shows loading and the infographics.
-
-## [1.1.1] - 2026-09-22
-
-### Changed
-- The usage button now sits in the OpenCode prompt footer, left of the context button, matching the native styling.
-- Clicking it opens an in-panel popover with sign-in, loading and the usage infographics instead of a separate window.
-- The panel follows the OpenCode theme (CSS variables) and refreshes live.
-
 ## [1.1.0] - 2026-09-22
 
 ### Added
-- Usage overlay inside the OpenCode panel: remaining day/week/month limits for an OpenCode Go subscription and today's spend, with an **Использование** button.
-- A usage dashboard window with per-period limits (percent and dollars), a per-model breakdown and a stacked daily histogram with a month switcher.
-- Sign-in to the OpenCode Console (session cookie captured from the embedded browser, stored encrypted with DPAPI).
-- New **Tools -> Options -> OpenCode Studio -> Usage & Limits** settings page.
-- A dedicated checkbox in the first-run wizard to enable the usage overlay.
+- **Statistics button in the OpenCode panel.** It sits just left of the context button in the prompt footer, and on opencode.ai pages it docks to the corner. One click opens your OpenCode profile and console right inside the tool window - check real usage and subscription limits without leaving Visual Studio, and click again to return to your chats.
+- **Sign-in to the OpenCode Console** inside the embedded browser (Google, GitHub or email). The session cookie is captured after the return navigation and stored encrypted with DPAPI.
+- **Tools -> Options -> OpenCode Studio -> Usage & Limits** settings page, plus a checkbox in the first-run wizard.
+- Reworked bilingual documentation (English and Russian) and a Marketplace description with a preview.
+
+### Fixed
+- **Stable server port** - the preferred port, then the last used one, then a free one. The embedded UI keeps a constant origin, so local settings, theme and chat history no longer reset between restarts.
+- Sign-in reliably returns to the app after authentication and restarts the monitor.
+- The injected button no longer triggers the context tooltip.
+
+### Notes
+- The built-in usage dashboard (remaining Go limits and spend charts inside the extension) is in progress - see the roadmap issue on GitHub.
 
 ## [1.0.10] - 2026-09-20
 
@@ -92,10 +75,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 - Initial public release: OpenCode web UI embedded in a Visual Studio tool window.
 
-[1.1.4]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.4
-[1.1.3]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.3
-[1.1.2]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.2
-[1.1.1]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.1
 [1.1.0]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.0
 [1.0.10]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.10
 [1.0.9]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.9

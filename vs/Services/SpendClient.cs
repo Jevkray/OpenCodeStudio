@@ -146,6 +146,9 @@ namespace OpenCodeStudio.Services
                         resp.StatusCode == System.Net.HttpStatusCode.Forbidden)
                         throw new ConsoleAuthException();
 
+                    if (!resp.IsSuccessStatusCode)
+                        Log.Warn($"Console API {path} -> {(int)resp.StatusCode}");
+
                     resp.EnsureSuccessStatusCode();
                     var json = await resp.Content.ReadAsStringAsync();
                     return JToken.Parse(json);

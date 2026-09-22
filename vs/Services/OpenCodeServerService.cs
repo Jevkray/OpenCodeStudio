@@ -84,7 +84,8 @@ namespace OpenCodeStudio.Services
                 // A stable port keeps the WebView2 origin (http://127.0.0.1:PORT)
                 // constant across restarts, so the OpenCode web UI keeps its
                 // local state (selected server/project) like the desktop app.
-                var port = IsPortFree(PreferredPort) ? PreferredPort : 0;
+                var port = ResolvePort();
+                Log.Info($"Using port {port}");
                 if (opencodePath.EndsWith(".cmd", StringComparison.OrdinalIgnoreCase) ||
                     opencodePath.EndsWith(".bat", StringComparison.OrdinalIgnoreCase))
                 {
@@ -213,6 +214,50 @@ namespace OpenCodeStudio.Services
 
         private static string RegistryPath => Path.Combine(
             OpenCodeEnvironment.StudioDir, "server.json");
+
+        private static string LastPortPath => Path.Combine(
+            OpenCodeEnvironment.StudioDir, "last-port.txt");
+
+        private static int ReadLastPort()
+        {
+            try
+            {
+                if (!File.Exists(LastPortPath)) return 0;
+                return int.TryParse(File.ReadAllText(LastPortPath).Trim(), out var p) ? p : 0;
+            }
+            catch { return 0; }
+        }
+
+        private static void SaveLastPort(int port)
+        {
+            try
+            {
+                Directory.CreateDirectory(OpenCodeEnvironment.StudioDir);
+                File.WriteAllText(LastPortPath, port.ToString());
+            }
+            catch { }
+        }
+
+        private static int ResolvePort()
+        {
+            // Стабильный origin: сначала пробуем предпочтительный порт, затем последний
+            // успешно использованный, и лишь потом случайный свободный.
+            if (IsPortFree(PreferredPort)) { SaveLastPort(PreferredPort); return PreferredPort; }
+
+            var last = ReadLastPort();
+            if (last > 0 && last != PreferredPort && IsPortFree(last)) return last;
+
+            try
+            {
+                var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
+                listener.Start();
+                var port = ((System.Net.IPEndPoint)listener.LocalEndpoint).Port;
+                listener.Stop();
+                SaveLastPort(port);
+                return port;
+            }
+            catch { return 0; }
+        }
 
         private static void WriteSharedRegistry(ServerInfo info)
         {
