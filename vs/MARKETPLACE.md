@@ -21,6 +21,7 @@
 
 ## 🆕 What's new
 
+- **1.1.2** - Popover clamped to the window; sign-in completes in-panel (OAuth kept in the embedded browser).
 - **1.1.1** - Usage button in the OpenCode footer with an in-panel popover (sign-in, loading, infographics).
 - **1.1.0** - Usage overlay with remaining Go limits and today's spend in the OpenCode panel, plus a usage dashboard window.
 

@@ -67,15 +67,20 @@
     var p=ensurePopover(), b=document.getElementById('ocstudio-usage-btn');
     if (!b) return;
     var r=b.getBoundingClientRect();
-    var left=Math.max(8, Math.min(r.left, window.innerWidth-436));
+    var w=Math.min(420, Math.max(260, window.innerWidth-16));
+    p.style.width=w+'px';
+    var left=Math.max(8, Math.min(r.left, window.innerWidth-w-8));
+    var maxH=Math.max(160, r.top-16);
+    p.style.maxHeight=maxH+'px';
     p.style.left=left+'px';
-    p.style.bottom=(window.innerHeight-r.top+8)+'px';
+    p.style.top=Math.max(8, r.top-8-maxH)+'px';
+    p.style.bottom='auto';
   }
 
   function toggle(){
     isOpen=!isOpen;
     var p=ensurePopover();
-    if (isOpen){ positionPopover(); render(); } else { p.style.display='none'; }
+    if (isOpen){ positionPopover(); render(); positionPopover(); } else { p.style.display='none'; }
   }
 
   function loginHtml(muted){

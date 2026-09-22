@@ -45,6 +45,7 @@ namespace OpenCodeStudio
         private SpendMonitor _spendMonitor;
         private SpendSettings _spendSettings;
         private bool _loginInProgress;
+        private bool _loginMode;
 
         // Токен жизни окна: отменяет длительные операции (ожидание логина) при закрытии.
         private readonly System.Threading.CancellationTokenSource _lifetimeCts = new System.Threading.CancellationTokenSource();
@@ -230,6 +231,14 @@ namespace OpenCodeStudio
 
         private void OnNewWindowRequested(object sender, CoreWebView2NewWindowRequestedEventArgs e)
         {
+            // Во время входа OAuth открывается как новое окно: оставляем навигацию
+            // внутри WebView2, иначе вход не завершается (cookie не появляется).
+            if (_loginMode)
+            {
+                try { e.Handled = true; webView.CoreWebView2.Navigate(e.Uri); } catch { }
+                return;
+            }
+
             // Let target=_blank links open in the user's real browser instead of
             // spawning an unmanaged popup inside the tool window.
             try
@@ -549,6 +558,7 @@ namespace OpenCodeStudio
             _loginInProgress = true;
             try
             {
+                _loginMode = true;
                 await ShowLoadingPageAsync("Вход в OpenCode Console...");
                 var core = webView?.CoreWebView2;
                 string cookie = null;
@@ -580,6 +590,7 @@ namespace OpenCodeStudio
             finally
             {
                 _loginInProgress = false;
+                _loginMode = false;
             }
         }
 
