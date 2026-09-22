@@ -77,10 +77,11 @@
     p.style.bottom='auto';
   }
 
+  function openPopover(){ isOpen=true; positionPopover(); render(); positionPopover(); }
+
   function toggle(){
-    isOpen=!isOpen;
     var p=ensurePopover();
-    if (isOpen){ positionPopover(); render(); positionPopover(); } else { p.style.display='none'; }
+    if (!isOpen){ openPopover(); } else { isOpen=false; p.style.display='none'; }
   }
 
   function loginHtml(muted){
@@ -162,7 +163,7 @@
     bind(p);
   }
 
-  try{ if (window.chrome&&window.chrome.webview) window.chrome.webview.addEventListener('message', function(e){ STATE=e.data||STATE; render(); }); }catch(e){}
+  try{ if (window.chrome&&window.chrome.webview) window.chrome.webview.addEventListener('message', function(e){ STATE=e.data||STATE; render(); if (STATE.autoOpen && !isOpen) openPopover(); }); }catch(e){}
   setInterval(function(){ ensureButton(); if (isOpen) positionPopover(); }, 1500);
   document.addEventListener('click', function(e){ if(!isOpen) return; var p=document.getElementById('ocstudio-usage-pop'); var b=document.getElementById('ocstudio-usage-btn'); if((p&&p.contains(e.target))||(b&&b.contains(e.target))) return; toggle(); }, true);
   ensureButton();

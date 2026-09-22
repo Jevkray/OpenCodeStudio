@@ -43,7 +43,7 @@ namespace OpenCodeStudio.Services
         }
 
         /// <summary>JSON для инъекции: state, todayCost, showLimits, лимиты Go и строки расхода.</summary>
-        public static string BuildPayload(string state, SpendSnapshot s, bool showLimits)
+        public static string BuildPayload(string state, SpendSnapshot s, bool showLimits, bool autoOpen)
         {
             var limits = s?.Limits;
             return JsonConvert.SerializeObject(new
@@ -51,6 +51,7 @@ namespace OpenCodeStudio.Services
                 state,
                 todayCost = s?.TodayCost ?? 0,
                 showLimits,
+                autoOpen,
                 limits = new
                 {
                     hasGo = limits?.HasGo ?? false,

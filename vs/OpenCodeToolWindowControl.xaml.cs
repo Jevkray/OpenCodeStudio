@@ -46,6 +46,7 @@ namespace OpenCodeStudio
         private SpendSettings _spendSettings;
         private bool _loginInProgress;
         private bool _loginMode;
+        private bool _autoOpenAfterLogin;
 
         // Токен жизни окна: отменяет длительные операции (ожидание логина) при закрытии.
         private readonly System.Threading.CancellationTokenSource _lifetimeCts = new System.Threading.CancellationTokenSource();
@@ -256,7 +257,8 @@ namespace OpenCodeStudio
                 Debug.WriteLine($"Navigation failed: {e.WebErrorStatus}");
                 return;
             }
-            PushUsageState();
+            PushUsageState(_autoOpenAfterLogin);
+            _autoOpenAfterLogin = false;
         }
 
         private async Task WaitServerAsync()
@@ -540,14 +542,14 @@ namespace OpenCodeStudio
         }
 
         /// <summary>Отправляет текущее состояние использования в веб-UI (UI-поток).</summary>
-        private void PushUsageState()
+        private void PushUsageState(bool autoOpen = false)
         {
             try
             {
                 var core = webView?.CoreWebView2;
                 if (core == null) return;
                 var state = ConsoleSessionStore.Load() == null ? "login" : (LatestSnapshot != null ? "ready" : "loading");
-                UsageInjector.Push(core, UsageInjector.BuildPayload(state, LatestSnapshot, _spendSettings?.ShowLimits ?? true));
+                UsageInjector.Push(core, UsageInjector.BuildPayload(state, LatestSnapshot, _spendSettings?.ShowLimits ?? true, autoOpen));
             }
             catch (Exception ex) { Services.Log.Error("Failed to push usage state", ex); }
         }
@@ -561,23 +563,23 @@ namespace OpenCodeStudio
                 _loginMode = true;
                 await ShowLoadingPageAsync("Вход в OpenCode Console...");
                 var core = webView?.CoreWebView2;
-                string cookie = null;
+                var ok = false;
                 if (core != null)
-                    cookie = await ConsoleLoginService.WaitForLoginAsync(core, _lifetimeCts.Token);
+                    ok = await ConsoleLoginService.WaitForLoginAsync(core, _lifetimeCts.Token);
+                Log.Info("Console login finished, success=" + ok);
 
-                if (cookie == null)
-                {
-                    // Вход не состоялся — не зацикливаемся, монитор не перезапускаем.
-                    return;
-                }
-
-                // Вход удался.
+                // Возвращаемся в приложение и перезапускаем монитор в любом случае.
+                _autoOpenAfterLogin = true;
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 var home = _serverController?.GetHomeUrl();
                 if (home != null && webView?.CoreWebView2 != null)
+                {
                     webView.CoreWebView2.Navigate(home);
-
-                PushUsageState();
+                }
+                else
+                {
+                    PushUsageState(true);
+                }
 
                 _spendMonitor?.Stop();
                 _spendMonitor = null;
