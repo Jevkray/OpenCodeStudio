@@ -18,6 +18,7 @@ namespace OpenCodeStudio
     [ProvideToolWindow(typeof(OpenCodeToolWindow))]
     [ProvideAutoLoad(UIContextGuids80.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
     [ProvideAutoLoad(UIContextGuids80.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
+    [ProvideOptionPage(typeof(Services.SpendSettings), "OpenCode Studio", "Usage & Limits", 0, 0, true)]
     public sealed class OpenCodeStudioPackage : AsyncPackage
     {
         public const string PackageGuidString = "7E4A9C31-2B6D-4F58-9A10-3C8E7B5D1F20";
@@ -29,6 +30,8 @@ namespace OpenCodeStudio
         /// Shared server controller вЂ” survives across tool window open/close.
         /// </summary>
         private ServerController _serverController;
+
+        private OpenCodeToolWindowControl _toolWindowControl;
 
         protected override async Task InitializeAsync(
             CancellationToken cancellationToken,
@@ -61,7 +64,7 @@ namespace OpenCodeStudio
                         // Let the shell finish initializing before showing a window.
                         await Task.Delay(2500);
                         await JoinableTaskFactory.SwitchToMainThreadAsync();
-                        new FirstRunWindow(new ImportService(), GetSolutionDir()).Show();
+                        new FirstRunWindow(new ImportService(), GetSolutionDir(), GetSpendSettings()).Show();
                     }
                     catch (Exception ex)
                     {
@@ -70,6 +73,9 @@ namespace OpenCodeStudio
                 });
             }
         }
+
+        private Services.SpendSettings GetSpendSettings()
+            => (Services.SpendSettings)GetDialogPage(typeof(Services.SpendSettings));
 
         private string GetSolutionDir()
         {
@@ -101,7 +107,10 @@ namespace OpenCodeStudio
             if (window is OpenCodeToolWindow toolWindow && toolWindow?.Control != null)
             {
                 toolWindow.SetServiceProvider(this);
+                _toolWindowControl = toolWindow.Control;
                 toolWindow.Control.SetServerController(_serverController);
+                toolWindow.Control.SetSpendSettings(GetSpendSettings());
+                toolWindow.Control.SetUsageRequestedHandler(() => _ = ShowUsageWindowAsync());
 
                 await toolWindow.Control.StartAsync();
             }
@@ -114,7 +123,10 @@ namespace OpenCodeStudio
 
             if (window is OpenCodeToolWindow toolWindow && toolWindow?.Control != null)
             {
+                _toolWindowControl = toolWindow.Control;
                 toolWindow.Control.SetServerController(_serverController);
+                toolWindow.Control.SetSpendSettings(GetSpendSettings());
+                toolWindow.Control.SetUsageRequestedHandler(() => _ = ShowUsageWindowAsync());
                 await toolWindow.Control.StartAsync();
             }
         }
@@ -126,6 +138,13 @@ namespace OpenCodeStudio
             window.Show();
         }
 
+        internal async Task ShowUsageWindowAsync()
+        {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            var w = new UsageWindow(_toolWindowControl, GetSpendSettings()?.ShowLimits ?? true);
+            w.Show();
+        }
+
         /// <summary>
         /// Opens the import/setup wizard on demand (also shown automatically on
         /// first run).
@@ -133,7 +152,7 @@ namespace OpenCodeStudio
         internal async Task ShowImportWindowAsync()
         {
             await JoinableTaskFactory.SwitchToMainThreadAsync();
-            var window = new FirstRunWindow(new ImportService(), GetSolutionDir());
+            var window = new FirstRunWindow(new ImportService(), GetSolutionDir(), GetSpendSettings());
             window.Show();
         }
 

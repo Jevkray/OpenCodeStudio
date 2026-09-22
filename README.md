@@ -24,6 +24,10 @@
 > [!TIP]
 > **One environment, everywhere.** OpenCode Studio shares the same data as the OpenCode CLI and desktop app — your providers, settings, credentials and **every chat** are already there. No setup, no duplication.
 
+## 🆕 What's new
+
+- **1.1.0** - Usage overlay: remaining Go limits and today's spend right in the OpenCode panel, plus a usage dashboard window.
+
 ## ✨ Why OpenCode Studio?
 
 | | |
@@ -152,6 +156,7 @@ The VSIX is produced at `vs/bin/Release/net472/OpenCodeStudio.vsix`. For a debug
 - 🔑 credentials are stored by OpenCode itself in your own environment
 - 🚫 no telemetry, no analytics
 - 📊 the dashboard reads from your local server
+- 📈 the usage overlay signs in to the OpenCode Console and reads your usage and limits from `opencode.ai` using your own session cookie (stored encrypted with DPAPI) — no other data leaves your machine.
 
 ## 💬 Contacts & Support
 

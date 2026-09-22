@@ -21,12 +21,30 @@
                        Text="OpenCode Studio runs the OpenCode web UI inside Visual Studio. We detected your existing OpenCode data below. Choose what to bring in, or just continue - nothing is changed unless you click Import." />
         </StackPanel>
 
-        <Border Grid.Row="1" Margin="24,0,24,0" CornerRadius="6" Background="#252526"
-                BorderBrush="#3a3a3a" BorderThickness="1">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
-                <StackPanel x:Name="sourcesPanel" />
-            </ScrollViewer>
-        </Border>
+        <Grid Grid.Row="1" Margin="24,0,24,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" CornerRadius="6" Background="#252526"
+                    BorderBrush="#3a3a3a" BorderThickness="1">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
+                    <StackPanel x:Name="sourcesPanel" />
+                </ScrollViewer>
+            </Border>
+
+            <Border x:Name="usageCard" Grid.Row="1" Margin="0,12,0,0" CornerRadius="6"
+                    Background="#2a2440" BorderBrush="#7C3AED" BorderThickness="1" Padding="14">
+                <StackPanel>
+                    <TextBlock Text="Usage &amp; limits overlay" FontSize="14" FontWeight="SemiBold" Foreground="#d7c4ff" />
+                    <CheckBox x:Name="usageCheck" Margin="0,8,0,0" Foreground="#e8e0ff" IsChecked="True"
+                              Content="Show usage strip and limits in the OpenCode panel" />
+                    <TextBlock Margin="0,6,0,0" FontSize="11" Foreground="#b9a8e0" TextWrapping="Wrap"
+                               Text="Adds a live strip (cost today and, with an OpenCode Go subscription, remaining day/week/month limits) to the OpenCode web UI. You can change this later in Tools &#8594; Options." />
+                </StackPanel>
+            </Border>
+        </Grid>
 
         <Grid Grid.Row="2" Margin="24,12,24,20">
             <Grid.ColumnDefinitions>

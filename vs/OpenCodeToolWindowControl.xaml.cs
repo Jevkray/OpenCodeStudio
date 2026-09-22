@@ -42,6 +42,33 @@ namespace OpenCodeStudio
         private bool _retryDisabled;
         private System.Threading.Timer _projRootTimer;
 
+        private SpendMonitor _spendMonitor;
+        private SpendSettings _spendSettings;
+        private bool _loginInProgress;
+        private bool _loginAttempted;
+
+        /// <summary>Запрос пользователя открыть окно статистики.</summary>
+        public event Action UsageRequested;
+
+        private Action _usageHandler;
+
+        /// <summary>Назначает единственный обработчик UsageRequested, снимая прежний.</summary>
+        public void SetUsageRequestedHandler(Action handler)
+        {
+            if (_usageHandler != null) UsageRequested -= _usageHandler;
+            _usageHandler = handler;
+            UsageRequested += handler;
+        }
+
+        // Токен жизни окна: отменяет длительные операции (ожидание логина) при закрытии.
+        private readonly System.Threading.CancellationTokenSource _lifetimeCts = new System.Threading.CancellationTokenSource();
+
+        /// <summary>Обновление снапшота расходов (на UI-потоке).</summary>
+        public event Action<SpendSnapshot> SnapshotUpdated;
+
+        /// <summary>Последний полученный снапшот расходов.</summary>
+        public SpendSnapshot LatestSnapshot { get; private set; }
+
         private bool _isReconnecting;
         private System.Threading.CancellationTokenSource _reconnectCts;
         private const int MaxReconnectAttempts = 30;
@@ -78,11 +105,24 @@ namespace OpenCodeStudio
             _serviceProvider = serviceProvider;
         }
 
+        public void SetSpendSettings(SpendSettings settings)
+        {
+            _spendSettings = settings;
+        }
+
         /// <summary>
         /// Set the shared server controller. Must be called before StartAsync.
         /// </summary>
         public void SetServerController(ServerController controller)
         {
+            if (_serverController == controller) return;
+
+            if (_serverController != null)
+            {
+                _serverController.ConnectionLost -= OnServerConnectionLost;
+                _serverController.ConnectionRestored -= OnServerConnectionRestored;
+            }
+
             _serverController = controller;
             if (_serverController != null)
             {
@@ -179,6 +219,18 @@ namespace OpenCodeStudio
                 core.Settings.IsStatusBarEnabled = false;
                 core.Settings.AreDevToolsEnabled = false;
                 core.Settings.IsZoomControlEnabled = true;
+
+                if (_spendSettings == null || _spendSettings.EnableInjection)
+                {
+                    try
+                    {
+                        await UsageInjector.InstallAsync(core);
+                    }
+                    catch (Exception ex)
+                    {
+                        Services.Log.Error("UsageInjector install failed", ex);
+                    }
+                }
 
                 await ShowLoadingPageAsync(StringsHelper.UILoading);
             }
@@ -436,6 +488,101 @@ namespace OpenCodeStudio
                     }
                 });
             }, null, 5000, 5000);
+
+            if (_serverController.State == ConnectionState.Connected)
+                StartSpendMonitor();
+        }
+
+        /// <summary>Запускает фоновый монитор расхода, если инъекция включена.</summary>
+        private void StartSpendMonitor()
+        {
+            if (_spendSettings == null || !_spendSettings.EnableInjection) return;
+
+            if (!_loginAttempted && ConsoleSessionStore.Load() == null)
+            {
+                // Флаг выставит сам OnSpendAuthRequired; иначе guard его же и отсечёт.
+                OnSpendAuthRequired();
+                return; // логин запустит монитор после успеха
+            }
+
+            if (_spendMonitor != null) return;
+
+            _spendMonitor = new SpendMonitor(_spendSettings);
+            _spendMonitor.Updated += OnSpendUpdated;
+            _spendMonitor.AuthRequired += OnSpendAuthRequired;
+            _spendMonitor.Start();
+        }
+
+        private void OnSpendUpdated(SpendSnapshot s)
+        {
+#pragma warning disable VSSDK007
+            _ = ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+            {
+                try
+                {
+                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                    var core = webView?.CoreWebView2;
+                    if (core == null) return;
+                    LatestSnapshot = s;
+                    SnapshotUpdated?.Invoke(s);
+                    UsageInjector.Push(core, UsageInjector.BuildPayload(s, _spendSettings?.ShowLimits ?? true));
+                }
+                catch (Exception ex)
+                {
+                    Services.Log.Error("Failed to push usage to WebView2", ex);
+                }
+            });
+#pragma warning restore VSSDK007
+        }
+
+        private void OnSpendAuthRequired()
+        {
+            // Одна попытка авто-входа, пока монитор сам не очистит протухшую cookie.
+            if (_loginInProgress || _loginAttempted) return;
+            _loginAttempted = true;
+#pragma warning disable VSSDK007
+            _ = ThreadHelper.JoinableTaskFactory.RunAsync(() => BeginConsoleLoginAsync());
+#pragma warning restore VSSDK007
+        }
+
+        private async Task BeginConsoleLoginAsync()
+        {
+            if (_loginInProgress) return;
+            _loginInProgress = true;
+            try
+            {
+                await ShowLoadingPageAsync("Вход в OpenCode Console...");
+                var core = webView?.CoreWebView2;
+                string cookie = null;
+                if (core != null)
+                    cookie = await ConsoleLoginService.WaitForLoginAsync(core, _lifetimeCts.Token);
+
+                if (cookie == null)
+                {
+                    // Вход не состоялся — не зацикливаемся, монитор не перезапускаем.
+                    return;
+                }
+
+                // Вход удался: сбрасываем флаг, чтобы авто-вход сработал при новом истечении.
+                _loginAttempted = false;
+
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                var home = _serverController?.GetHomeUrl();
+                if (home != null && webView?.CoreWebView2 != null)
+                    webView.CoreWebView2.Navigate(home);
+
+                _spendMonitor?.Stop();
+                _spendMonitor = null;
+                StartSpendMonitor();
+            }
+            catch (Exception ex)
+            {
+                Services.Log.Error("Console login failed", ex);
+            }
+            finally
+            {
+                _loginInProgress = false;
+            }
         }
 
         private void NavigateToSession(string sessionUrl)
@@ -448,6 +595,11 @@ namespace OpenCodeStudio
         private void OnWebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
             var message = e.TryGetWebMessageAsString();
+            if (message == "open-usage")
+            {
+                UsageRequested?.Invoke();
+                return;
+            }
             if (message == "retry" && !_retryDisabled)
             {
                 _retryDisabled = true;
@@ -509,8 +661,16 @@ namespace OpenCodeStudio
         {
             if (_isDisposed) return;
             _isDisposed = true;
+            try { _lifetimeCts.Cancel(); _lifetimeCts.Dispose(); } catch { }
             _projRootTimer?.Dispose();
             CancelReconnect();
+            if (_spendMonitor != null)
+            {
+                _spendMonitor.Updated -= OnSpendUpdated;
+                _spendMonitor.AuthRequired -= OnSpendAuthRequired;
+            }
+            _spendMonitor?.Dispose();
+            _spendMonitor = null;
             webView?.Dispose();
         }
     }

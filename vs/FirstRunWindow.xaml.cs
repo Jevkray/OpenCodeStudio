@@ -20,6 +20,7 @@ namespace OpenCodeStudio
         private readonly ImportService _service;
         private readonly string _solutionDir;
         private readonly Action _onFinished;
+        private readonly Services.SpendSettings _settings;
         private readonly Dictionary<ImportItem, CheckBox> _checks = new Dictionary<ImportItem, CheckBox>();
         private string _customPath;
 
@@ -32,12 +33,17 @@ namespace OpenCodeStudio
         private static SolidColorBrush Brush(System.Drawing.Color c)
             => new SolidColorBrush(Color.FromRgb(c.R, c.G, c.B));
 
-        public FirstRunWindow(ImportService service, string solutionDir, Action onFinished = null)
+        public FirstRunWindow(ImportService service, string solutionDir,
+            Services.SpendSettings settings = null, Action onFinished = null)
         {
             InitializeComponent();
             _service = service ?? new ImportService();
             _solutionDir = solutionDir;
             _onFinished = onFinished;
+            _settings = settings;
+
+            usageCheck.IsChecked = _settings?.EnableInjection ?? true;
+            if (_settings == null) usageCard.Visibility = Visibility.Collapsed;
 
             ApplyTheme();
             Loaded += (_, __) => Rebuild();
@@ -223,6 +229,19 @@ namespace OpenCodeStudio
 
         private void Finish()
         {
+            if (_settings != null)
+            {
+                try
+                {
+                    _settings.EnableInjection = usageCheck.IsChecked == true;
+                    _settings.SaveSettingsToStorage();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Failed to save spend settings", ex);
+                }
+            }
+
             Onboarding.MarkCompleted();
             _onFinished?.Invoke();
             Close();

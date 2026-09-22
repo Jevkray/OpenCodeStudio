@@ -19,6 +19,10 @@
 
 ---
 
+## 🆕 What's new
+
+- **1.1.0** - Usage overlay with remaining Go limits and today's spend in the OpenCode panel, plus a usage dashboard window.
+
 ## ✨ Highlights
 
 - 🧠 **Real OpenCode, not a clone** — the complete official web UI, rendered directly in Visual Studio.
@@ -71,6 +75,7 @@ Once the paths match, all chats sync between the CLI, the desktop app and every 
 - 🔑 credentials are stored by OpenCode itself in your own environment
 - 🚫 no telemetry, no analytics
 - 📊 the dashboard reads from your local server
+- 📈 the usage overlay signs in to the OpenCode Console and reads your usage and limits from `opencode.ai` using your own session cookie (stored encrypted with DPAPI) — no other data leaves your machine.
 
 ## 💬 Contacts & Support
 

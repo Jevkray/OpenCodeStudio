@@ -3,6 +3,15 @@
 All notable changes to **OpenCode Studio** are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.0] - 2026-09-22
+
+### Added
+- Usage overlay inside the OpenCode panel: remaining day/week/month limits for an OpenCode Go subscription and today's spend, with an **Использование** button.
+- A usage dashboard window with per-period limits (percent and dollars), a per-model breakdown and a stacked daily histogram with a month switcher.
+- Sign-in to the OpenCode Console (session cookie captured from the embedded browser, stored encrypted with DPAPI).
+- New **Tools -> Options -> OpenCode Studio -> Usage & Limits** settings page.
+- A dedicated checkbox in the first-run wizard to enable the usage overlay.
+
 ## [1.0.10] - 2026-09-20
 
 ### Added
@@ -59,6 +68,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 - Initial public release: OpenCode web UI embedded in a Visual Studio tool window.
 
+[1.1.0]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.0
 [1.0.10]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.10
 [1.0.9]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.9
 [1.0.8]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.8
