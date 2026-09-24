@@ -6,7 +6,7 @@
 
 **The OpenCode AI coding agent — natively inside Visual Studio.**
 
-*A fast, self-contained tool window with a usage dashboard, a first-run import wizard and shared chat history.*
+*A fast, self-contained tool window with a first-run import wizard and shared chat history.*
 
 [![Marketplace](https://img.shields.io/visual-studio-marketplace/v/jevkray.OpenCodeStudio?label=marketplace&color=7C3AED)](https://marketplace.visualstudio.com/items?itemName=jevkray.OpenCodeStudio)
 [![Installs](https://img.shields.io/visual-studio-marketplace/i/jevkray.OpenCodeStudio?color=7C3AED)](https://marketplace.visualstudio.com/items?itemName=jevkray.OpenCodeStudio)
@@ -44,7 +44,6 @@
 | 🧠 | **Real OpenCode, not a clone** — the complete official web UI, rendered directly in Visual Studio. |
 | 🔄 | **Shared history** — the same chats as the CLI and desktop app, across every Visual Studio window. |
 | 🗂️ | **All chats visible** — opens the web UI home, listing every project and session. |
-| 📊 | **Usage dashboard** — cost, tokens and requests with OpenCode-style charts. |
 | 📈 | **Profile & usage in one click** — the statistics button opens your OpenCode console inside the panel, so you can check real spend and limits without switching to a browser. |
 | 📥 | **First-run wizard** — import settings, themes, credentials and history in one click. |
 | 🔁 | **Auto-reconnect** — recovers the session by itself if the server drops. |
@@ -61,8 +60,7 @@
 
 ```text
   View   →  Other Windows  →  OpenCode Studio        🔹 the agent
-  Tools  →  OpenCode Studio Usage Statistics        📊 cost & tokens
-  Tools  →  OpenCode Studio Import Settings...      📥 setup wizard
+  Tools  →  OpenCode Studio Settings                📥 setup wizard
 ```
 
 > [!NOTE]
@@ -92,24 +90,14 @@ OpenCode stores every session **against the project directory it was created in*
 > If a project lives at a **different absolute path** than when its chats were created (another drive, another user name, a moved or renamed folder), those sessions stay under the original path. **Line up the project paths and everything synchronizes.**
 
 1. Open each project at the **same absolute path** it originally used — e.g. `C:\Users\<you>\source\repos\MyApp`.
-2. If the path changed, move the project back, or import the old data via **Tools → OpenCode Studio Import Settings...** pointing at the folder with the original `opencode.db`.
+2. If the path changed, move the project back, or import the old data via **Tools → OpenCode Studio Settings** pointing at the folder with the original `opencode.db`.
 3. Reopen the tool window — the sessions appear under the matching project.
 
 Once the paths match, **all chats sync** between the CLI, the desktop app and every Visual Studio window. 🎉
 
-## 📊 Usage statistics
+## Usage statistics
 
-> [!NOTE]
-> **Tools → OpenCode Studio Usage Statistics** opens a **local** dashboard built from the OpenCode API — no external services.
-
-| 📈 Panel | What it shows |
-|---|---|
-| 💰 KPI cards | Total cost, tokens, sessions, requests |
-| 🗓️ Cost by day | A smooth area chart |
-| 🍩 Tokens by type | Input / output / reasoning / cache |
-| 🤖 Cost by model | Spend per model |
-| 🔍 Cost per request | For the current session |
-| 📋 Session table | Model, agent, tokens and cost |
+Statistics are not part of this release yet. Use the statistics button in the OpenCode panel to open the OpenCode Console (usage and limits) directly.
 
 ## 🧱 Architecture
 
@@ -164,7 +152,6 @@ The VSIX is produced at `vs/bin/Release/net472/OpenCodeStudio.vsix`. For a debug
 - 🖧 the server binds to `127.0.0.1` only
 - 🔑 credentials are stored by OpenCode itself in your own environment
 - 🚫 no telemetry, no analytics
-- 📊 the dashboard reads from your local server
 - 📈 the usage overlay signs in to the OpenCode Console and reads your usage and limits from `opencode.ai` using your own session cookie (stored encrypted with DPAPI) — no other data leaves your machine.
 
 ## 💬 Contacts & Support
