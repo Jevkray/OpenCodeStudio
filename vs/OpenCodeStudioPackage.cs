@@ -45,7 +45,6 @@ namespace OpenCodeStudio
             Services.SpendSettings.Applied += OnSpendSettingsApplied;
 
             await ShowOpenCodeWindowCommand.InitializeAsync(this);
-            await ShowStatsCommand.InitializeAsync(this);
             await ShowImportCommand.InitializeAsync(this);
 
             _dte = await GetServiceAsync(typeof(DTE)) as DTE;
@@ -146,13 +145,6 @@ namespace OpenCodeStudio
                 toolWindow.Control.SetSpendSettings(GetSpendSettings());
                 await toolWindow.Control.StartAsync();
             }
-        }
-
-        internal async Task ShowStatsWindowAsync()
-        {
-            await JoinableTaskFactory.SwitchToMainThreadAsync();
-            var window = new UsageStatsWindow(_serverController);
-            window.Show();
         }
 
         internal async Task ShowUsageWindowAsync()

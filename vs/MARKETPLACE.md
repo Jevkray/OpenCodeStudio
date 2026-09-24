@@ -21,7 +21,15 @@
 
 ## 🆕 What's new
 
-- **1.1.1** - Works with **opencode v2 (and v1)**: a native **"Use OpenCode v2.x (preview)"** toggle in the first-run wizard and in **Tools → Options → OpenCode Studio**, automatic `opencode2` detection, Basic Auth support for the v2 server (CVE-2026-22812 fix) and a single VSIX for Visual Studio 2022 and 2026.
+- **1.1.2**
+  - Always uses the **latest installed opencode**: on start the server re-checks the binary (path + modification time) and restarts if it changed; `server.json` now records the real server process PID.
+  - The first-run wizard is now a **Settings** window with **Import** and **Settings** tabs; the button is **Save selected** and applies both imports and settings.
+  - The **"OpenCode Studio Usage Statistics"** menu item and its window are temporarily removed (statistics will return later); a button in the panel opens the OpenCode Console in the meantime.
+- **1.1.1**
+  - Works with **opencode v1 and v2 (including the v2 beta)**: the extension sets the server password itself, sends HTTP Basic Auth on every request and passes the credentials to WebView2 (the v2 server requires auth after the CVE-2026-22812 fix). The misleading "not in PATH" error is gone.
+  - Auto-detects the v2 beta binary (`opencode2`) and adds a native **"Use OpenCode v2.x (preview)"** switch (settings window and **Tools → Options**); `OPENCODESTUDIO_OPENCODE_BIN` forces a binary path.
+  - One VSIX for **Visual Studio 2022 and 2026**.
+  - Fixes: no more v2 reconnect loop (health check no longer demands `{"healthy":true}`), the whole process tree is terminated (`taskkill /T`, so the port no longer "jumps"), and readiness no longer depends on the startup log line.
 - **1.1.0** - Statistics button in the OpenCode panel: open your profile and check real usage without leaving Visual Studio.
 
 ## ✨ Highlights

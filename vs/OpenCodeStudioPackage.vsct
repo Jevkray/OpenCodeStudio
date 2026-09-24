@@ -27,22 +27,13 @@
           <CommandName>OpenCode Studio</CommandName>
         </Strings>
       </Button>
-      <Button guid="guidOpenCodeCmdSet" id="cmdidShowStats"
-              priority="0x0200" type="Button">
-        <Parent guid="guidOpenCodeCmdSet" id="grpOpenCodeWindow" />
-        <Icon guid="guidImages" id="bmpCommand" />
-        <Strings>
-          <ButtonText>OpenCode Studio Usage Statistics</ButtonText>
-          <CommandName>OpenCode Studio Usage Statistics</CommandName>
-        </Strings>
-      </Button>
       <Button guid="guidOpenCodeCmdSet" id="cmdidShowImport"
               priority="0x0300" type="Button">
         <Parent guid="guidOpenCodeCmdSet" id="grpOpenCodeWindow" />
         <Icon guid="guidImages" id="bmpCommand" />
         <Strings>
-          <ButtonText>OpenCode Studio Import Settings...</ButtonText>
-          <CommandName>OpenCode Studio Import Settings...</CommandName>
+          <ButtonText>OpenCode Studio Settings</ButtonText>
+          <CommandName>OpenCode Studio Settings</CommandName>
         </Strings>
       </Button>
     </Buttons>
@@ -54,9 +45,6 @@
       <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
     </CommandPlacement>
     <CommandPlacement guid="guidOpenCodeCmdSet" id="cmdidShowOpenCodeWindow" priority="0x0200">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_TOOLS_OTHER2" />
-    </CommandPlacement>
-    <CommandPlacement guid="guidOpenCodeCmdSet" id="cmdidShowStats" priority="0x0300">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_TOOLS_OTHER2" />
     </CommandPlacement>
     <CommandPlacement guid="guidOpenCodeCmdSet" id="cmdidShowImport" priority="0x0400">
@@ -75,7 +63,6 @@
     <GuidSymbol name="guidOpenCodeCmdSet" value="{D91F3A72-6C40-4E8B-B25D-8A47F0C63E15}">
       <IDSymbol name="grpOpenCodeWindow" value="0x1000" />
       <IDSymbol name="cmdidShowOpenCodeWindow" value="0x0100" />
-      <IDSymbol name="cmdidShowStats" value="0x0101" />
       <IDSymbol name="cmdidShowImport" value="0x0102" />
     </GuidSymbol>
 

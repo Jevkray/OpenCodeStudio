@@ -66,7 +66,6 @@ namespace OpenCodeStudio
 
             Background = Brush(_bg);
             titleText.Foreground = Brush(_text);
-            subtitleText.Foreground = Brush(_muted);
             statusText.Foreground = Brush(_muted);
             foreach (var b in new[] { browseButton, skipButton, importButton })
             {
@@ -200,7 +199,7 @@ namespace OpenCodeStudio
             var selected = _checks.Where(kv => kv.Value.IsChecked == true).Select(kv => kv.Key).ToList();
             if (selected.Count == 0)
             {
-                statusText.Text = "Nothing selected to import.";
+                statusText.Text = "Nothing selected to save.";
                 return;
             }
 

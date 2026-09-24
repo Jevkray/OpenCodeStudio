@@ -21,6 +21,7 @@ namespace OpenCodeStudio.Services
         private ServerInfo _serverInfo;
         private ConnectionState _state = ConnectionState.Disconnected;
         private bool _ownsProcess;
+        private string _binaryPath;
 
         public ServerInfo ServerInfo => _serverInfo;
         public ConnectionState State => _state;
@@ -60,6 +61,7 @@ namespace OpenCodeStudio.Services
                     return false;
                 }
                 Log.Info($"Using opencode executable: {opencodePath}");
+                _binaryPath = opencodePath;
 
                 var psi = new System.Diagnostics.ProcessStartInfo
                 {
@@ -226,6 +228,10 @@ namespace OpenCodeStudio.Services
             var info = ReadSharedRegistry();
             if (info == null) return false;
 
+            // Не переиспользуем сервер, запущенный другим/старым бинарём opencode:
+            // после обновления CLI поднимем свежий. Проверяем только при старте.
+            if (IsRecordedBinaryStale()) return false;
+
             try
             {
                 using (var client = CreateHttpClient(info))
@@ -291,7 +297,7 @@ namespace OpenCodeStudio.Services
             catch { return 0; }
         }
 
-        private static void WriteSharedRegistry(ServerInfo info)
+        private void WriteSharedRegistry(ServerInfo info)
         {
             try
             {
@@ -302,11 +308,44 @@ namespace OpenCodeStudio.Services
                     Port = info.Port,
                     Username = info.Username,
                     Password = info.Password,
-                    Pid = System.Diagnostics.Process.GetCurrentProcess().Id
+                    Binary = _binaryPath,
+                    BinaryStamp = CurrentBinaryStamp(),
+                    Pid = _process?.Id ?? 0
                 };
                 File.WriteAllText(RegistryPath, JsonConvert.SerializeObject(record));
             }
             catch { }
+        }
+
+        private bool IsRecordedBinaryStale()
+        {
+            try
+            {
+                if (!File.Exists(RegistryPath)) return false;
+                var rec = JsonConvert.DeserializeObject<SharedServerRecord>(File.ReadAllText(RegistryPath));
+                if (rec == null) return false;
+                var current = ResolveOpenCodePath();
+                if (!string.IsNullOrEmpty(rec.Binary) && !string.IsNullOrEmpty(current)
+                    && !string.Equals(rec.Binary, current, StringComparison.OrdinalIgnoreCase))
+                    return true;
+                var stamp = CurrentBinaryStamp();
+                if (rec.BinaryStamp != 0 && stamp != 0 && rec.BinaryStamp != stamp)
+                    return true;
+            }
+            catch { }
+            return false;
+        }
+
+        private long CurrentBinaryStamp()
+        {
+            try
+            {
+                var path = !string.IsNullOrEmpty(_binaryPath) ? _binaryPath : ResolveOpenCodePath();
+                if (!string.IsNullOrEmpty(path) && File.Exists(path))
+                    return File.GetLastWriteTimeUtc(path).Ticks;
+            }
+            catch { }
+            return 0;
         }
 
         private static ServerInfo ReadSharedRegistry()
@@ -591,6 +630,8 @@ namespace OpenCodeStudio.Services
         public int Port { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
+        public string Binary { get; set; }
+        public long BinaryStamp { get; set; }
         public int Pid { get; set; }
     }
 }
