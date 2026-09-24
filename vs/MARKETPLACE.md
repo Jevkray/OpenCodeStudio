@@ -21,11 +21,13 @@
 
 ## 🆕 What's new
 
+- **1.1.1** - Works with **opencode v2 (and v1)**: a native **"Use OpenCode v2.x (preview)"** toggle in the first-run wizard and in **Tools → Options → OpenCode Studio**, automatic `opencode2` detection, Basic Auth support for the v2 server (CVE-2026-22812 fix) and a single VSIX for Visual Studio 2022 and 2026.
 - **1.1.0** - Statistics button in the OpenCode panel: open your profile and check real usage without leaving Visual Studio.
 
 ## ✨ Highlights
 
 - 🧠 **Real OpenCode, not a clone** — the complete official web UI, rendered directly in Visual Studio.
+- 🔀 **opencode v1 and v2 (beta)** — a native **"Use OpenCode v2.x (preview)"** toggle in the first-run wizard and in **Tools → Options → OpenCode Studio** switches between versions (restarting the server); the extension auto-detects `opencode2` and handles the v2 server's HTTP Basic Auth.
 - 🔄 **Shared history** — the same chats as the CLI and desktop app, across every Visual Studio window.
 - 🗂️ **All chats visible** — opens the web UI home, listing every project and session.
 - 📊 **Usage dashboard** — cost, tokens and requests with OpenCode-style charts.
@@ -43,7 +45,7 @@ Tools  ->  OpenCode Studio Usage Statistics         (cost & tokens)
 Tools  ->  OpenCode Studio Import Settings...       (setup wizard)
 ```
 
-> **Requirement:** the OpenCode CLI must be installed and available on your `PATH`.
+> **Requirement:** the OpenCode CLI (v1 or v2 beta) must be installed and available on your `PATH`.
 
 ## 🔗 Syncing chat history
 

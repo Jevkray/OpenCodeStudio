@@ -45,6 +45,9 @@ namespace OpenCodeStudio
             usageCheck.IsChecked = _settings?.EnableInjection ?? true;
             if (_settings == null) usageCard.Visibility = Visibility.Collapsed;
 
+            v2Check.IsChecked = _settings?.UseOpenCodeV2 ?? false;
+            if (_settings == null) v2Card.Visibility = Visibility.Collapsed;
+
             ApplyTheme();
             Loaded += (_, __) => Rebuild();
         }
@@ -234,6 +237,7 @@ namespace OpenCodeStudio
                 try
                 {
                     _settings.EnableInjection = usageCheck.IsChecked == true;
+                    _settings.UseOpenCodeV2 = v2Check.IsChecked == true;
                     _settings.SaveSettingsToStorage();
                 }
                 catch (Exception ex)

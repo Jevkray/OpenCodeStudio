@@ -24,6 +24,7 @@ namespace OpenCodeStudio.Services
 
         public ServerInfo ServerInfo => _serverInfo;
         public ConnectionState State => _state;
+        public bool PreferV2 { get; set; }
         public event Action<ConnectionState> StateChanged;
 
         public HttpClient GetClient()
@@ -69,11 +70,17 @@ namespace OpenCodeStudio.Services
                     CreateNoWindow = true
                 };
 
-                // A stray OPENCODE_SERVER_PASSWORD in the inherited environment
-                // would switch the server to HTTP auth mode, making the embedded
-                // WebView2 (and our HttpClient) get 401 responses. The embedded
-                // client always talks to a loopback-only server, so we drop it.
-                try { psi.EnvironmentVariables.Remove("OPENCODE_SERVER_PASSWORD"); } catch { }
+                // opencode v2 (как и v1 с заданным паролем) защищает сервер HTTP
+                // Basic Auth — фикс CVE-2026-22812. Задаём СВОЙ пароль, чтобы
+                // детерминированно авторизоваться и в HttpClient, и в WebView2.
+                var serverUser = "opencode";
+                var serverPass = Guid.NewGuid().ToString("N");
+                try
+                {
+                    psi.EnvironmentVariables["OPENCODE_SERVER_USERNAME"] = serverUser;
+                    psi.EnvironmentVariables["OPENCODE_SERVER_PASSWORD"] = serverPass;
+                }
+                catch { }
 
                 // NOTE: we deliberately do NOT override XDG_* here. Using the
                 // user's default OpenCode environment keeps history, settings and
@@ -108,7 +115,19 @@ namespace OpenCodeStudio.Services
                 _ownsProcess = true;
                 ProcessBinding.BindToCurrentProcess(_process);
 
-                var resolvedInfo = await ResolveServerUrlAsync(_process, ConnectTimeoutMs);
+                // Мы сами задали порт, поэтому не зависим от формата строки
+                // запуска (в v2 он мог измениться). Парсинг stdout остаётся
+                // фолбэком на случай, если порт выбрать не удалось.
+                ServerInfo resolvedInfo;
+                if (port > 0)
+                {
+                    resolvedInfo = new ServerInfo("127.0.0.1", port);
+                    DrainStreams(_process);
+                }
+                else
+                {
+                    resolvedInfo = await ResolveServerUrlAsync(_process, ConnectTimeoutMs);
+                }
                 if (resolvedInfo == null)
                 {
                     Log.Error("Failed to detect server URL from process output");
@@ -116,6 +135,8 @@ namespace OpenCodeStudio.Services
                     return false;
                 }
 
+                resolvedInfo.Username = serverUser;
+                resolvedInfo.Password = serverPass;
                 _serverInfo = resolvedInfo;
                 Log.Info($"Server listening on {resolvedInfo.BaseUrl}");
                 WriteSharedRegistry(resolvedInfo);
@@ -147,13 +168,10 @@ namespace OpenCodeStudio.Services
             try
             {
                 var response = await _httpClient.GetAsync("/global/health");
-                if (response.IsSuccessStatusCode)
-                {
-                    var json = await response.Content.ReadAsStringAsync();
-                    var health = JsonConvert.DeserializeObject<HealthInfo>(json);
-                    return health?.Healthy == true;
-                }
-                return false;
+                // opencode v2 отдаёт SPA-страницу на любой путь (включая
+                // /global/health), поэтому тело не парсим: успешный ответ
+                // означает, что сервер жив и авторизация прошла.
+                return response.IsSuccessStatusCode;
             }
             catch { return false; }
         }
@@ -171,7 +189,24 @@ namespace OpenCodeStudio.Services
                 Log.Info("Stopping OpenCode server");
                 if (!_process.HasExited)
                 {
-                    try { _process.Kill(); _process.WaitForExit(5000); } catch { }
+                    // .cmd-шим (node) не умирает вместе с cmd.exe: убиваем всё
+                    // дерево, иначе процесс держит порт и серверы копятся.
+                    try
+                    {
+                        var psi = new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = "taskkill",
+                            Arguments = "/T /F /PID " + _process.Id,
+                            UseShellExecute = false,
+                            CreateNoWindow = true,
+                            RedirectStandardOutput = true,
+                            RedirectStandardError = true
+                        };
+                        using (var killer = System.Diagnostics.Process.Start(psi))
+                            killer?.WaitForExit(5000);
+                    }
+                    catch { try { _process.Kill(); } catch { } }
+                    try { _process.WaitForExit(3000); } catch { }
                 }
                 _process.Dispose();
                 RemoveSharedRegistry();
@@ -198,9 +233,6 @@ namespace OpenCodeStudio.Services
                     client.Timeout = TimeSpan.FromSeconds(3);
                     var response = await client.GetAsync("/global/health");
                     if (!response.IsSuccessStatusCode) return false;
-                    var json = await response.Content.ReadAsStringAsync();
-                    var health = JsonConvert.DeserializeObject<HealthInfo>(json);
-                    if (health?.Healthy != true) return false;
                 }
             }
             catch { return false; }
@@ -268,6 +300,8 @@ namespace OpenCodeStudio.Services
                 {
                     Host = info.Host,
                     Port = info.Port,
+                    Username = info.Username,
+                    Password = info.Password,
                     Pid = System.Diagnostics.Process.GetCurrentProcess().Id
                 };
                 File.WriteAllText(RegistryPath, JsonConvert.SerializeObject(record));
@@ -283,7 +317,13 @@ namespace OpenCodeStudio.Services
                 var record = JsonConvert.DeserializeObject<SharedServerRecord>(
                     File.ReadAllText(RegistryPath));
                 if (record == null || record.Port <= 0) return null;
-                return new ServerInfo(string.IsNullOrEmpty(record.Host) ? "127.0.0.1" : record.Host, record.Port);
+                return new ServerInfo(
+                    string.IsNullOrEmpty(record.Host) ? "127.0.0.1" : record.Host,
+                    record.Port)
+                {
+                    Username = record.Username,
+                    Password = record.Password
+                };
             }
             catch { return null; }
         }
@@ -393,12 +433,12 @@ namespace OpenCodeStudio.Services
                 {
                     client.Timeout = TimeSpan.FromSeconds(3);
                     var response = await client.GetAsync("/global/health");
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var json = await response.Content.ReadAsStringAsync();
-                        var health = JsonConvert.DeserializeObject<HealthInfo>(json);
-                        return health?.Healthy == true;
-                    }
+                    // Любой ответ означает, что сервер слушает. 401/403 приходит,
+                    // когда opencode требует Basic Auth (фикс CVE-2026-22812) —
+                    // это НЕ повод считать сервер незапущенным.
+                    if (!response.IsSuccessStatusCode)
+                        Log.Info($"Health check returned {(int)response.StatusCode}; server is reachable");
+                    return true;
                 }
             }
             catch { }
@@ -418,11 +458,39 @@ namespace OpenCodeStudio.Services
             {
                 ServerCertificateCustomValidationCallback = (_, _, _, _) => true
             };
-            return new HttpClient(handler)
+            var client = new HttpClient(handler)
             {
                 BaseAddress = new Uri(info.BaseUrl),
                 Timeout = TimeSpan.FromSeconds(30)
             };
+            if (info != null && info.HasAuth)
+            {
+                var raw = (info.Username ?? "opencode") + ":" + info.Password;
+                var token = Convert.ToBase64String(Encoding.UTF8.GetBytes(raw));
+                client.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", token);
+            }
+            return client;
+        }
+
+        // Читаем stdout/stderr в фоне, чтобы процесс не заблокировался на
+        // заполненном буфере (строку запуска при заданном порте не парсим).
+        private static void DrainStreams(System.Diagnostics.Process process)
+        {
+            try
+            {
+                process.OutputDataReceived += (s, e) =>
+                {
+                    if (e.Data != null) System.Diagnostics.Debug.WriteLine("OpenCode stdout: " + e.Data);
+                };
+                process.ErrorDataReceived += (s, e) =>
+                {
+                    if (e.Data != null) System.Diagnostics.Debug.WriteLine("OpenCode stderr: " + e.Data);
+                };
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+            }
+            catch { }
         }
 
         private void SetState(ConnectionState newState)
@@ -434,14 +502,61 @@ namespace OpenCodeStudio.Services
             }
         }
 
-        private static string ResolveOpenCodePath()
+        private string ResolveOpenCodePath()
+        {
+            // Явное переопределение пути к бинарю (например, для теста v2-беты
+            // opencode2): OPENCODESTUDIO_OPENCODE_BIN=<полный путь>.
+            var overridePath = Environment.GetEnvironmentVariable("OPENCODESTUDIO_OPENCODE_BIN");
+            if (!string.IsNullOrWhiteSpace(overridePath) && File.Exists(overridePath))
+                return overridePath;
+
+            // v1 ставится как "opencode"; v2-бета — отдельным бинарём "opencode2".
+            // Порядок имён зависит от настройки PreferV2.
+            var names = PreferV2
+                ? new[] { "opencode2", "opencode" }
+                : new[] { "opencode", "opencode2" };
+
+            var dirs = new[]
+            {
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "npm"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "nvmw", "nodejs"),
+                Path.Combine(Environment.GetEnvironmentVariable("ProgramFiles") ?? "", "nodejs"),
+            };
+
+            foreach (var name in names)
+            {
+                var path = FindByName(name, dirs);
+                if (path == null) continue;
+
+                if (PreferV2 && name == "opencode")
+                    Log.Warn("OpenCode v2 (opencode2) not found; falling back to opencode v1");
+                return path;
+            }
+
+            return null;
+        }
+
+        private static string FindByName(string name, string[] dirs)
+        {
+            var direct = FindOnPath(name);
+            if (direct != null) return direct;
+
+            foreach (var dir in dirs)
+            {
+                var path = Path.Combine(dir, name + ".cmd");
+                if (File.Exists(path)) return path;
+            }
+            return null;
+        }
+
+        private static string FindOnPath(string name)
         {
             try
             {
                 var psi = new System.Diagnostics.ProcessStartInfo
                 {
                     FileName = "cmd.exe",
-                    Arguments = "/c where opencode 2>nul",
+                    Arguments = "/c where " + name + " 2>nul",
                     RedirectStandardOutput = true,
                     UseShellExecute = false,
                     CreateNoWindow = true
@@ -465,16 +580,6 @@ namespace OpenCodeStudio.Services
                 }
             }
             catch { }
-
-            var commonPaths = new[]
-            {
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "npm", "opencode.cmd"),
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "nvmw", "nodejs", "opencode.cmd"),
-                Path.Combine(Environment.GetEnvironmentVariable("ProgramFiles") ?? "", "nodejs", "opencode.cmd"),
-            };
-            foreach (var path in commonPaths)
-                if (File.Exists(path)) return path;
-
             return null;
         }
     }
@@ -484,6 +589,8 @@ namespace OpenCodeStudio.Services
     {
         public string Host { get; set; }
         public int Port { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
         public int Pid { get; set; }
     }
 }

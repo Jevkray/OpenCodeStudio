@@ -3,6 +3,17 @@
 All notable changes to **OpenCode Studio** are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.1] - 2026-09-24
+
+### Added
+- **OpenCode v1 and v2 support.** The extension now secures the embedded server with its own password and sends Basic Auth on every request (and to WebView2), so it works both with stable opencode v1 and with opencode v2 / the v2 beta, which protect the server after the CVE-2026-22812 fix. The misleading "not in PATH" error is gone.
+- Detect the OpenCode 2 beta binary (`opencode2`) in addition to `opencode`, plus a native **OpenCode version** switch (v1 / v2 preview) in the first-run wizard and in Tools -> Options -> OpenCode Studio. Changing it restarts the server with the selected binary. `OPENCODESTUDIO_OPENCODE_BIN` can force a binary path.
+
+### Fixed
+- **OpenCode v2 (beta) reconnect loop.** The v2 server answers every path with its web app, so the strict `{"healthy":true}` health check always failed and the extension kept restarting the server ("connection lost - reconnecting"). Health now only requires a successful HTTP response, which works for both v1 and v2.
+- Server processes are now killed **with their child tree** (`taskkill /T`). Previously a `.cmd` shim left the Node process alive, so it kept holding the port and every restart picked a new random port.
+- Readiness no longer depends on the server's exact startup log line.
+
 ## [1.1.0] - 2026-09-22
 
 ### Added
@@ -75,6 +86,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 - Initial public release: OpenCode web UI embedded in a Visual Studio tool window.
 
+[1.1.1]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.1
 [1.1.0]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.0
 [1.0.10]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.10
 [1.0.9]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.0.9

@@ -40,7 +40,9 @@ namespace OpenCodeStudio
             await base.InitializeAsync(cancellationToken, progress);
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-            _serverController = new ServerController();
+            _serverController = new ServerController(() => GetSpendSettings()?.UseOpenCodeV2 ?? false);
+
+            Services.SpendSettings.Applied += OnSpendSettingsApplied;
 
             await ShowOpenCodeWindowCommand.InitializeAsync(this);
             await ShowStatsCommand.InitializeAsync(this);
@@ -76,6 +78,23 @@ namespace OpenCodeStudio
 
         private Services.SpendSettings GetSpendSettings()
             => (Services.SpendSettings)GetDialogPage(typeof(Services.SpendSettings));
+
+        private void OnSpendSettingsApplied()
+        {
+            _ = JoinableTaskFactory.RunAsync(async () =>
+            {
+                try
+                {
+                    await JoinableTaskFactory.SwitchToMainThreadAsync();
+                    _serverController?.Stop();
+                    await RefreshOpenCodeWindowAsync();
+                }
+                catch (Exception ex)
+                {
+                    Services.Log.Error("Restart after settings change failed", ex);
+                }
+            });
+        }
 
         private string GetSolutionDir()
         {

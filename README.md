@@ -26,6 +26,7 @@
 
 ## 🆕 What's new
 
+- **1.1.1** - Works with **opencode v2 (and v1)**: a native **"Use OpenCode v2.x (preview)"** toggle in the first-run wizard and in **Tools → Options → OpenCode Studio**, automatic `opencode2` detection, Basic Auth support for the v2 server (CVE-2026-22812 fix) and a single VSIX for Visual Studio 2022 and 2026.
 - **1.1.0** - Statistics button in the OpenCode panel: open your profile and check real usage without leaving Visual Studio.
 
 ## ✨ Why OpenCode Studio?
@@ -136,8 +137,8 @@ OpenCode Studio keeps a deliberately small, decoupled core.
 
 | Component | Version |
 |---|---|
-| 🖥️ Visual Studio | 2022 (17.0) – 2026 |
-| ⚡ OpenCode CLI | installed and on `PATH` |
+| 🖥️ Visual Studio | 2022 and 2026 |
+| ⚡ OpenCode CLI | v1 and v2 (beta), installed and on `PATH` |
 | 🛠️ .NET SDK *(build from source)* | .NET 10 |
 | 🌐 WebView2 Runtime | bundled with Windows 10/11 and VS |
 

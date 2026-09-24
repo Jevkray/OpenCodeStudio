@@ -205,6 +205,7 @@ namespace OpenCodeStudio
                 core.NewWindowRequested += OnNewWindowRequested;
                 core.NavigationStarting += OnNavigationStarting;
                 core.NavigationCompleted += OnNavigationCompleted;
+                core.BasicAuthenticationRequested += OnBasicAuthenticationRequested;
 
                 core.Settings.AreDefaultContextMenusEnabled = true;
                 core.Settings.IsStatusBarEnabled = false;
@@ -251,6 +252,24 @@ namespace OpenCodeStudio
                 Process.Start(new ProcessStartInfo(e.Uri) { UseShellExecute = true });
             }
             catch { }
+        }
+
+        private void OnBasicAuthenticationRequested(
+            object sender, CoreWebView2BasicAuthenticationRequestedEventArgs e)
+        {
+            // opencode v2 защищает сервер Basic Auth. Отдаём пароль, который
+            // мы сами задали при запуске процесса (см. OpenCodeServerService).
+            var info = _serverController?.ServerService?.ServerInfo;
+            if (info == null || !info.HasAuth) return;
+            try
+            {
+                e.Response.UserName = info.Username ?? "opencode";
+                e.Response.Password = info.Password;
+            }
+            catch (Exception ex)
+            {
+                Services.Log.Error("Basic auth handoff failed", ex);
+            }
         }
 
         private void OnNavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)

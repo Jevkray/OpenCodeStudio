@@ -14,6 +14,7 @@ namespace OpenCodeStudio.Services
     public class ServerController : IDisposable
     {
         private readonly IOpenCodeServerService _serverService;
+        private readonly Func<bool> _useV2;
         private IConnectionMonitor _connectionMonitor;
         private IOpenCodeSessionService _sessionService;
 
@@ -45,8 +46,9 @@ namespace OpenCodeStudio.Services
         public event Action ConnectionRestored;
         public event Action WorkspaceMismatch;
 
-        public ServerController()
+        public ServerController(Func<bool> useV2 = null)
         {
+            _useV2 = useV2;
             _serverService = new OpenCodeServerService();
             _serverService.StateChanged += s => ServerStateChanged?.Invoke(s);
         }
@@ -58,6 +60,8 @@ namespace OpenCodeStudio.Services
         {
             CancelShutdown();
             _currentProjectRoot = projectRoot;
+
+            _serverService.PreferV2 = _useV2?.Invoke() ?? false;
 
             _sessionService = new OpenCodeSessionService(_serverService);
 

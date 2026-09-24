@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using Microsoft.VisualStudio.Shell;
 
@@ -26,5 +27,18 @@ namespace OpenCodeStudio.Services
         [Category("Usage & Limits")]
         [DisplayName("History refresh interval (seconds)")]
         public int HistoryPollSeconds { get; set; } = 60;
+
+        [Category("Server")]
+        [DisplayName("Use OpenCode v2.x (preview)")]
+        [Description("Prefer the OpenCode 2 beta binary (opencode2) when both v1 and v2 are installed.")]
+        public bool UseOpenCodeV2 { get; set; } = false;
+
+        public static event Action Applied;
+
+        protected override void OnApply(PageApplyEventArgs e)
+        {
+            base.OnApply(e);
+            try { Applied?.Invoke(); } catch { }
+        }
     }
 }

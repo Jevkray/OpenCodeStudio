@@ -26,6 +26,7 @@
 
 ## 🆕 Что нового
 
+- **1.1.1** - Поддержка **opencode v2 (и v1)**: нативный переключатель **"Use OpenCode v2.x (preview)"** в мастере первого запуска и в **Сервис → Параметры → OpenCode Studio**, авто-обнаружение `opencode2`, поддержка Basic Auth для сервера v2 (фикс CVE-2026-22812) и один VSIX для Visual Studio 2022 и 2026.
 - **1.1.0** - Кнопка статистики в панели OpenCode: профиль и реальные траты, не выходя из Visual Studio.
 
 ## ✨ Почему OpenCode Studio?
@@ -136,8 +137,8 @@ OpenCode хранит каждую сессию **в привязке к кат�
 
 | Компонент | Версия |
 |---|---|
-| 🖥️ Visual Studio | 2022 (17.0) – 2026 |
-| ⚡ OpenCode CLI | установлен и в `PATH` |
+| 🖥️ Visual Studio | 2022 и 2026 |
+| ⚡ OpenCode CLI | v1 и v2 (beta), установлен и в `PATH` |
 | 🛠️ .NET SDK *(сборка из исходников)* | .NET 10 |
 | 🌐 WebView2 Runtime | входит в Windows 10/11 и VS |
 
