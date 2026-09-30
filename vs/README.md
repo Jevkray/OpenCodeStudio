@@ -21,7 +21,7 @@
 
 ## 🆕 What's new
 
-- **1.1.4** - Background check for a newer **OpenCode Studio** release on the Visual Studio Marketplace (every minute). When an update is available, a compact dark-themed window shows the new version, its release notes and **Update** / **Not now** buttons. OpenCode itself is now checked for updates too — a newer CLI version can be installed from the same kind of window (`npm i -g opencode-ai@latest`) or shown as a manual command.
+- **1.1.4** - Background update checks (once a minute). For **OpenCode Studio itself**: a compact dark-themed window shows the new version and its release notes with **Open Extension Manager** / **Marketplace page** / **Not now** buttons (Visual Studio already installs extension updates in the background). For **OpenCode CLI**: the window offers to update it right from the extension (`npm i -g opencode-ai@latest`) or shows the manual command; the panel picks up the new version on restart. New setting **Check for new versions** turns extension update notifications off.
 - **1.1.3** - The Settings window shows the installed and the latest available OpenCode version, with an **Update** button when a newer release exists. A new OpenCode version is now picked up automatically.
 - **1.1.2**
   - Always uses the **latest installed opencode**: on start the server re-checks the binary (path + modification time) and restarts if it changed; `server.json` now records the real server process PID.
