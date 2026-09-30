@@ -33,6 +33,11 @@ namespace OpenCodeStudio.Services
         [Description("Prefer the OpenCode 2 beta binary (opencode2) when both v1 and v2 are installed.")]
         public bool UseOpenCodeV2 { get; set; } = false;
 
+        [Category("Updates")]
+        [DisplayName("Check for new versions")]
+        [Description("Check the Visual Studio Marketplace for a newer OpenCode Studio version and show a notification. Disable it if you prefer to stay on your current version.")]
+        public bool CheckForUpdates { get; set; } = true;
+
         public static event Action Applied;
 
         protected override void OnApply(PageApplyEventArgs e)

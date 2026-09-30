@@ -3,6 +3,18 @@
 All notable changes to **OpenCode Studio** are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.4] - 2026-09-30
+
+### Added
+- Background check for a newer OpenCode Studio release on the Visual Studio Marketplace (once a minute). When an update is available, a compact dark window shows the new version and its release notes with **Open Extension Manager** / **Marketplace page** / **Not now** buttons (Visual Studio itself installs updates in the background; "Not now" hides the window until the next restart).
+- OpenCode itself is now checked for updates too (once a minute). If a newer CLI version is available, a compact window offers to update it right from the extension (`npm i -g opencode-ai@latest`) or shows the manual command; the panel picks up the new version on restart.
+- New setting **Check for new versions** (Tools -> Options -> OpenCode Studio, and the Settings window). When disabled, the extension no longer shows update notifications.
+
+## [1.1.3] - 2026-09-30
+
+### Added
+- The Settings window now shows the installed and the latest available OpenCode version, and offers an **Update** button (runs `npm i -g opencode-ai@latest`) when a newer version exists. Combined with the existing start-time check, a new OpenCode version is picked up automatically.
+
 ## [1.1.2] - 2026-09-24
 
 ### Changed
@@ -96,6 +108,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 - Initial public release: OpenCode web UI embedded in a Visual Studio tool window.
 
+[1.1.4]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.4
+[1.1.3]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.3
 [1.1.2]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.2
 [1.1.1]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.1
 [1.1.0]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.0

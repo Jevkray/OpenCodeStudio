@@ -39,6 +39,22 @@
             <TabItem Header="Settings">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="12">
                     <StackPanel>
+                        <Border x:Name="updateCard" Margin="0,0,0,12" CornerRadius="6"
+                                Background="#252526" BorderBrush="#3a3a3a" BorderThickness="1" Padding="14">
+                            <StackPanel>
+                                <TextBlock Text="OpenCode version" FontSize="14" FontWeight="SemiBold" Foreground="#f1f1f1" />
+                                <TextBlock x:Name="updateVersionText" Margin="0,6,0,0" FontSize="12"
+                                           Foreground="#e6e6e6" TextWrapping="Wrap"
+                                           Text="Checking for updates..." />
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                    <Button x:Name="updateButton" Content="Update" Padding="14,6"
+                                            FontWeight="SemiBold" Visibility="Collapsed" Click="OnUpdateClick" />
+                                    <TextBlock x:Name="updateHintText" Margin="10,0,0,0" VerticalAlignment="Center"
+                                               FontSize="11" Foreground="#a0a0a0" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
                         <Border x:Name="usageCard" Margin="0,0,0,12" CornerRadius="6"
                                 Background="#2a2440" BorderBrush="#7C3AED" BorderThickness="1" Padding="14">
                             <StackPanel>
@@ -50,10 +66,21 @@
                             </StackPanel>
                         </Border>
 
+                        <Border x:Name="updatesCard" Margin="0,0,0,12" CornerRadius="6"
+                                Background="#252526" BorderBrush="#3a3a3a" BorderThickness="1" Padding="14">
+                            <StackPanel>
+                                <TextBlock Text="Updates" FontSize="14" FontWeight="SemiBold" Foreground="#f1f1f1" />
+                                <CheckBox x:Name="updatesCheck" Margin="0,8,0,0" Foreground="#e6e6e6"
+                                          Content="Check for new OpenCode Studio versions" />
+                                <TextBlock Margin="0,6,0,0" FontSize="11" Foreground="#a0a0a0" TextWrapping="Wrap"
+                                           Text="Shows a notification when a newer version is available on the Marketplace. Visual Studio still installs updates automatically unless you disable that in Manage Extensions." />
+                            </StackPanel>
+                        </Border>
+
                         <Border x:Name="v2Card" CornerRadius="6"
                                 Background="#252526" BorderBrush="#3a3a3a" BorderThickness="1" Padding="14">
                             <StackPanel>
-                                <TextBlock Text="OpenCode version" FontSize="14" FontWeight="SemiBold" Foreground="#f1f1f1" />
+                                <TextBlock Text="OpenCode version (v1 / v2 preview)" FontSize="14" FontWeight="SemiBold" Foreground="#f1f1f1" />
                                 <CheckBox x:Name="v2Check" Margin="0,8,0,0" Foreground="#e6e6e6"
                                           Content="Use opencode v2.x (preview) version" />
                                 <TextBlock Margin="0,6,0,0" FontSize="11" Foreground="#a0a0a0" TextWrapping="Wrap"

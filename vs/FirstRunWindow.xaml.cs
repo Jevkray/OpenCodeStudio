@@ -21,6 +21,7 @@ namespace OpenCodeStudio
         private readonly string _solutionDir;
         private readonly Action _onFinished;
         private readonly Services.SpendSettings _settings;
+        private readonly OpenCodeUpdateService _updateService = new OpenCodeUpdateService();
         private readonly Dictionary<ImportItem, CheckBox> _checks = new Dictionary<ImportItem, CheckBox>();
         private string _customPath;
 
@@ -48,8 +49,11 @@ namespace OpenCodeStudio
             v2Check.IsChecked = _settings?.UseOpenCodeV2 ?? false;
             if (_settings == null) v2Card.Visibility = Visibility.Collapsed;
 
+            updatesCheck.IsChecked = _settings?.CheckForUpdates ?? true;
+            if (_settings == null) updatesCard.Visibility = Visibility.Collapsed;
+
             ApplyTheme();
-            Loaded += (_, __) => Rebuild();
+            Loaded += (_, __) => { Rebuild(); CheckForUpdatesAsync(); };
         }
 
         private void ApplyTheme()
@@ -74,6 +78,10 @@ namespace OpenCodeStudio
                 b.BorderBrush = Brush(_muted);
             }
             importButton.Foreground = Brush(_text);
+
+            updateButton.Foreground = Brushes.White;
+            updateButton.Background = Brush(_accent);
+            updateButton.BorderBrush = Brush(_accent);
         }
 
         private void Rebuild()
@@ -229,6 +237,59 @@ namespace OpenCodeStudio
 
         private void OnSkipClick(object sender, RoutedEventArgs e) => Finish();
 
+        private async void CheckForUpdatesAsync()
+        {
+            try
+            {
+                var installed = await _updateService.GetInstalledVersionAsync();
+                var latest = await _updateService.GetLatestVersionAsync();
+                ApplyVersionState(installed, latest);
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("OpenCode version check failed: " + ex.Message);
+            }
+        }
+
+        private void ApplyVersionState(string installed, string latest)
+        {
+            updateVersionText.Text = $"Installed: {installed ?? "?"}   Latest: {latest ?? "?"}";
+
+            if (OpenCodeUpdateService.IsNewer(latest, installed))
+            {
+                updateButton.Visibility = Visibility.Visible;
+                updateHintText.Text = "A newer OpenCode is available";
+            }
+            else
+            {
+                updateButton.Visibility = Visibility.Collapsed;
+                updateHintText.Text = latest == null ? "" : "Up to date";
+            }
+        }
+
+        private async void OnUpdateClick(object sender, RoutedEventArgs e)
+        {
+            updateButton.IsEnabled = false;
+            statusText.Text = "Updating...";
+            try
+            {
+                var ok = await _updateService.UpdateAsync(line => Log.Info("[opencode update] " + line));
+                var installed = await _updateService.GetInstalledVersionAsync();
+                var latest = await _updateService.GetLatestVersionAsync();
+                ApplyVersionState(installed, latest);
+                statusText.Text = ok ? "OpenCode updated." : "Update failed. See the log for details.";
+            }
+            catch (Exception ex)
+            {
+                Log.Error("OpenCode update failed", ex);
+                statusText.Text = "Update failed: " + ex.Message;
+            }
+            finally
+            {
+                updateButton.IsEnabled = true;
+            }
+        }
+
         private void Finish()
         {
             if (_settings != null)
@@ -237,6 +298,7 @@ namespace OpenCodeStudio
                 {
                     _settings.EnableInjection = usageCheck.IsChecked == true;
                     _settings.UseOpenCodeV2 = v2Check.IsChecked == true;
+                    _settings.CheckForUpdates = updatesCheck.IsChecked == true;
                     _settings.SaveSettingsToStorage();
                 }
                 catch (Exception ex)

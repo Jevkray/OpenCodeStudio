@@ -21,6 +21,8 @@
 
 ## 🆕 What's new
 
+- **1.1.4** - Background check for a newer **OpenCode Studio** release on the Visual Studio Marketplace (every minute). When an update is available, a compact dark-themed window shows the new version, its release notes and **Update** / **Not now** buttons. OpenCode itself is now checked for updates too — a newer CLI version can be installed from the same kind of window (`npm i -g opencode-ai@latest`) or shown as a manual command.
+- **1.1.3** - The Settings window shows the installed and the latest available OpenCode version, with an **Update** button when a newer release exists. A new OpenCode version is now picked up automatically.
 - **1.1.2**
   - Always uses the **latest installed opencode**: on start the server re-checks the binary (path + modification time) and restarts if it changed; `server.json` now records the real server process PID.
   - The first-run wizard is now a **Settings** window with **Import** and **Settings** tabs; the button is **Save selected** and applies both imports and settings.
@@ -43,6 +45,7 @@
 - 🔁 **Auto-reconnect** — recovers the session by itself if the server drops.
 - 🔒 **Local-first** — loopback only, zero telemetry.
 - 🪶 **Lightweight** — one VSIX for Visual Studio 2022 and 2026.
+- ⚙️ **Update check toggle** - turn update notifications on or off in settings.
 
 ## 🚀 Getting started
 

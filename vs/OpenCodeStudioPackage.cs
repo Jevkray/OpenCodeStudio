@@ -32,6 +32,10 @@ namespace OpenCodeStudio
         private ServerController _serverController;
 
         private OpenCodeToolWindowControl _toolWindowControl;
+        private CancellationTokenSource _extensionUpdateCts;
+        private volatile bool _updateWindowOpen;
+        private CancellationTokenSource _openCodeUpdateCts;
+        private volatile bool _openCodeUpdateWindowOpen;
 
         protected override async Task InitializeAsync(
             CancellationToken cancellationToken,
@@ -73,6 +77,110 @@ namespace OpenCodeStudio
                     }
                 });
             }
+
+            StartExtensionUpdateLoop();
+            StartOpenCodeUpdateLoop();
+        }
+
+        /// <summary>
+        /// Фоновая проверка новой версии самого opencode: первая через ~30 c,
+        /// затем каждые 60 c. Показывает окно только если есть новее и пользователь
+        /// ещё не отклонил его в этой сессии VS.
+        /// </summary>
+        private void StartOpenCodeUpdateLoop()
+        {
+            _openCodeUpdateCts = new CancellationTokenSource();
+            var ct = _openCodeUpdateCts.Token;
+            var service = new OpenCodeUpdateService();
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(30000, ct);
+                    while (!ct.IsCancellationRequested)
+                    {
+                        try
+                        {
+                            var installed = await service.GetInstalledVersionAsync();
+                            var latest = await service.GetLatestVersionAsync();
+                            if (!string.IsNullOrEmpty(installed) && !string.IsNullOrEmpty(latest) &&
+                                OpenCodeUpdateService.IsNewer(latest, installed) &&
+                                !OpenCodeUpdateWindow.Suppressed && !_openCodeUpdateWindowOpen)
+                            {
+                                await JoinableTaskFactory.SwitchToMainThreadAsync(ct);
+                                if (!OpenCodeUpdateWindow.Suppressed && !_openCodeUpdateWindowOpen)
+                                {
+                                    var window = new OpenCodeUpdateWindow(installed, latest);
+                                    _openCodeUpdateWindowOpen = true;
+                                    window.Closed += (_, __) => _openCodeUpdateWindowOpen = false;
+                                    window.Show();
+                                }
+                            }
+                        }
+                        catch (OperationCanceledException) { return; }
+                        catch (Exception ex)
+                        {
+                            Services.Log.Warn("OpenCode update check failed: " + ex.Message);
+                        }
+
+                        await Task.Delay(60000, ct);
+                    }
+                }
+                catch (OperationCanceledException) { }
+            }, ct);
+        }
+
+        /// <summary>
+        /// Фоновая проверка новой версии самого расширения: первая через ~20 c,
+        /// затем каждые 60 c. Показывает окно только если есть новее и пользователь
+        /// ещё не отклонил его в этой сессии VS.
+        /// </summary>
+        private void StartExtensionUpdateLoop()
+        {
+            _extensionUpdateCts = new CancellationTokenSource();
+            var ct = _extensionUpdateCts.Token;
+            var service = new ExtensionUpdateService();
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(20000, ct);
+                    while (!ct.IsCancellationRequested)
+                    {
+                        try
+                        {
+                            var info = await service.CheckAsync();
+                            if (info != null && info.IsNewer &&
+                                !UpdateNotificationWindow.Suppressed && !_updateWindowOpen)
+                            {
+                                await JoinableTaskFactory.SwitchToMainThreadAsync(ct);
+                                var checkForUpdates = GetSpendSettings()?.CheckForUpdates ?? true;
+                                if (checkForUpdates && !UpdateNotificationWindow.Suppressed && !_updateWindowOpen)
+                                {
+                                    var window = new UpdateNotificationWindow(info, () =>
+                                    {
+                                        try { _dte?.ExecuteCommand("Tools.ManageExtensions"); }
+                                        catch (Exception ex) { Services.Log.Error("Open Extension Manager failed", ex); throw; }
+                                    });
+                                    _updateWindowOpen = true;
+                                    window.Closed += (_, __) => _updateWindowOpen = false;
+                                    window.Show();
+                                }
+                            }
+                        }
+                        catch (OperationCanceledException) { return; }
+                        catch (Exception ex)
+                        {
+                            Services.Log.Warn("Extension update check failed: " + ex.Message);
+                        }
+
+                        await Task.Delay(60000, ct);
+                    }
+                }
+                catch (OperationCanceledException) { }
+            }, ct);
         }
 
         private Services.SpendSettings GetSpendSettings()
@@ -169,6 +277,10 @@ namespace OpenCodeStudio
         {
             if (disposing)
             {
+                _extensionUpdateCts?.Cancel();
+                _extensionUpdateCts?.Dispose();
+                _openCodeUpdateCts?.Cancel();
+                _openCodeUpdateCts?.Dispose();
                 _serverController?.Dispose();
             }
             base.Dispose(disposing);
