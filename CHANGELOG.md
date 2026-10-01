@@ -3,6 +3,18 @@
 All notable changes to **OpenCode Studio** are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.5] - 2026-09-30
+
+### Fixed
+- Closing the update window with the X button now suppresses it until the next Visual Studio restart (same as "Not now").
+- "Open Extension Manager" now reliably opens Visual Studio's Extension Manager (several known command names plus a DTE command search); the Marketplace page is only a fallback.
+
+## [1.1.5] - 2026-09-30
+
+### Fixed
+- Closing the update window with the X button now suppresses it until the next Visual Studio restart (same as "Not now").
+- "Open Extension Manager" now reliably opens Visual Studio's Extension Manager (several known command names plus a DTE command search); the Marketplace page is only a fallback.
+
 ## [1.1.4] - 2026-09-30
 
 ### Added
@@ -108,6 +120,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 - Initial public release: OpenCode web UI embedded in a Visual Studio tool window.
 
+[1.1.5]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.5
+[1.1.5]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.5
 [1.1.4]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.4
 [1.1.3]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.3
 [1.1.2]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.2

@@ -26,6 +26,8 @@
 
 ## 🆕 What's new
 
+- **1.1.5** - Fixed: closing the update window hides it until the next restart; "Open Extension Manager" opens the Visual Studio extension manager.
+- **1.1.5** - Closing the update window hides it until the next Visual Studio restart, and **Open Extension Manager** now opens the Visual Studio extension manager (Marketplace page only as a fallback).
 - **1.1.4** - Background update checks (once a minute). For **OpenCode Studio itself**: a compact dark-themed window shows the new version and its release notes with **Open Extension Manager** / **Marketplace page** / **Not now** buttons (Visual Studio already installs extension updates in the background). For **OpenCode CLI**: the window offers to update it right from the extension (`npm i -g opencode-ai@latest`) or shows the manual command; the panel picks up the new version on restart. New setting **Check for new versions** turns extension update notifications off.
 - **1.1.3** - The Settings window shows the installed and the latest available OpenCode version, with an **Update** button when a newer release exists. A new OpenCode version is now picked up automatically.
 - **1.1.2**

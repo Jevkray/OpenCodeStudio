@@ -161,8 +161,9 @@ namespace OpenCodeStudio
                                 {
                                     var window = new UpdateNotificationWindow(info, () =>
                                     {
-                                        try { _dte?.ExecuteCommand("Tools.ManageExtensions"); }
-                                        catch (Exception ex) { Services.Log.Error("Open Extension Manager failed", ex); throw; }
+                                        var opened = TryOpenExtensionManager();
+                                        if (!opened) throw new InvalidOperationException("Extension Manager command not found");
+                                        Services.Log.Info("Opened Extension Manager");
                                     });
                                     _updateWindowOpen = true;
                                     window.Closed += (_, __) => _updateWindowOpen = false;
@@ -181,6 +182,38 @@ namespace OpenCodeStudio
                 }
                 catch (OperationCanceledException) { }
             }, ct);
+        }
+
+        /// <summary>
+        /// Надёжно открывает Manage Extensions внутри VS. Вызывать с UI-потока.
+        /// </summary>
+        private bool TryOpenExtensionManager()
+        {
+            if (_dte == null) return false;
+
+            var candidates = new[] { "Tools.ManageExtensions", "Tools.ExtensionsAndUpdates",
+                                     "Tools.ManageExtensionsDialog", "Tools.InstallCommunityTools" };
+            foreach (var name in candidates)
+            {
+                try { _dte.ExecuteCommand(name); return true; } catch { }
+            }
+
+            try
+            {
+                foreach (EnvDTE.Command cmd in _dte.Commands)
+                {
+                    var n = cmd?.Name;
+                    if (string.IsNullOrEmpty(n)) continue;
+                    if (n.IndexOf("ManageExtensions", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        n.IndexOf("ExtensionsAndUpdates", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        try { _dte.ExecuteCommand(n); return true; } catch { }
+                    }
+                }
+            }
+            catch { }
+
+            return false;
         }
 
         private Services.SpendSettings GetSpendSettings()
