@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed (minor)
 - Minor maintenance hotfix: more reliable **Open Extension Manager** action (opens the Visual Studio extension manager; tries the Updates page first, then several fallbacks) and the update window stays hidden until the next Visual Studio restart after it is closed with the X button.
+- Any button in the update window now also hides it until the next Visual Studio restart (instead of only "Not now"), and the window explains how to turn the notifications off in settings.
 
 ## [1.1.5] - 2026-09-30
 
