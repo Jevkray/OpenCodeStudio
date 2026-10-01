@@ -3,6 +3,11 @@
 All notable changes to **OpenCode Studio** are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.5.1] - 2026-10-01
+
+### Changed (minor)
+- Minor maintenance hotfix: more reliable **Open Extension Manager** action (opens the Visual Studio extension manager; tries the Updates page first, then several fallbacks) and the update window stays hidden until the next Visual Studio restart after it is closed with the X button.
+
 ## [1.1.5] - 2026-09-30
 
 ### Fixed
@@ -120,6 +125,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 - Initial public release: OpenCode web UI embedded in a Visual Studio tool window.
 
+[1.1.5.1]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.5.1
 [1.1.5]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.5
 [1.1.5]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.5
 [1.1.4]: https://github.com/Jevkray/OpenCodeStudio/releases/tag/v1.1.4

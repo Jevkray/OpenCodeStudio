@@ -161,9 +161,13 @@ namespace OpenCodeStudio
                                 {
                                     var window = new UpdateNotificationWindow(info, () =>
                                     {
-                                        var opened = TryOpenExtensionManager();
-                                        if (!opened) throw new InvalidOperationException("Extension Manager command not found");
-                                        Services.Log.Info("Opened Extension Manager");
+                                        JoinableTaskFactory.Run(async () =>
+                                        {
+                                            await JoinableTaskFactory.SwitchToMainThreadAsync();
+                                            if (!TryOpenExtensionManager())
+                                                throw new InvalidOperationException("Extension Manager command not found");
+                                            Services.Log.Info("Opened Extension Manager");
+                                        });
                                     });
                                     _updateWindowOpen = true;
                                     window.Closed += (_, __) => _updateWindowOpen = false;
@@ -189,15 +193,66 @@ namespace OpenCodeStudio
         /// </summary>
         private bool TryOpenExtensionManager()
         {
-            if (_dte == null) return false;
+            if (_dte == null) { Services.Log.Info("Extension Manager: DTE is null"); return false; }
 
-            var candidates = new[] { "Tools.ManageExtensions", "Tools.ExtensionsAndUpdates",
-                                     "Tools.ManageExtensionsDialog", "Tools.InstallCommunityTools" };
+            // 1) известные имена команд (VS 2026 — ManageExtensions, затем VS 2022 и старые)
+            var candidates = new[] {
+                "ManageExtensions", "Extensions.ManageExtensions", "Extensions.ManageExtensionsDialog",
+                "Extensions.ExtensionsAndUpdates", "Tools.ManageExtensions",
+                "Tools.ExtensionsAndUpdates"
+            };
+
+            // 2) открыть сразу вкладку Updates: сначала с аргументом, затем без
+            try
+            {
+                _dte.ExecuteCommand("ManageExtensions", "Updates");
+                Services.Log.Info("Extension Manager opened (Updates tab) via command: ManageExtensions Updates");
+                return true;
+            }
+            catch (Exception ex) { Services.Log.Info("Extension Manager: 'ManageExtensions Updates' -> " + ex.Message); }
+
+            try
+            {
+                _dte.ExecuteCommand("ManageExtensions");
+                Services.Log.Info("Extension Manager opened via command: ManageExtensions");
+                return true;
+            }
+            catch (Exception ex) { Services.Log.Info("Extension Manager: 'ManageExtensions' -> " + ex.Message); }
+
+            // 3) поиск среди всех команд DTE: Update + (Extension|Manage)
+            try
+            {
+                foreach (EnvDTE.Command cmd in _dte.Commands)
+                {
+                    var n = cmd?.Name;
+                    if (string.IsNullOrEmpty(n)) continue;
+                    if (n.IndexOf("Update", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                        (n.IndexOf("Extension", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                         n.IndexOf("Manage", StringComparison.OrdinalIgnoreCase) >= 0))
+                    {
+                        try
+                        {
+                            _dte.ExecuteCommand(n, "Updates");
+                            Services.Log.Info("Extension Manager opened (Updates tab) via DTE search: " + n);
+                            return true;
+                        }
+                        catch
+                        {
+                            try { _dte.ExecuteCommand(n); Services.Log.Info("Extension Manager opened via DTE search: " + n); return true; } catch { }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex) { Services.Log.Info("Extension Manager: DTE enumeration failed: " + ex.Message); }
+
+            // 4) остальные известные кандидаты
             foreach (var name in candidates)
             {
-                try { _dte.ExecuteCommand(name); return true; } catch { }
+                try { _dte.ExecuteCommand(name); Services.Log.Info("Extension Manager opened via command: " + name); return true; }
+                catch (Exception ex) { Services.Log.Info("Extension Manager: '" + name + "' -> " + ex.Message); }
             }
 
+            // 5) перебор ManageExtensions / ExtensionsAndUpdates среди всех команд DTE (как было)
             try
             {
                 foreach (EnvDTE.Command cmd in _dte.Commands)
@@ -207,13 +262,66 @@ namespace OpenCodeStudio
                     if (n.IndexOf("ManageExtensions", StringComparison.OrdinalIgnoreCase) >= 0 ||
                         n.IndexOf("ExtensionsAndUpdates", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        try { _dte.ExecuteCommand(n); return true; } catch { }
+                        try { _dte.ExecuteCommand(n); Services.Log.Info("Extension Manager opened via DTE search: " + n); return true; } catch { }
                     }
                 }
+            }
+            catch (Exception ex) { Services.Log.Info("Extension Manager: DTE enumeration failed: " + ex.Message); }
+
+            // 6) поиск по меню/тулбарам (по подписи), устойчиво к локализации
+            try
+            {
+                var needles = new[] { "manage extensions", "extensions and updates", "управление расширениями" };
+                if (_dte.CommandBars is System.Collections.IEnumerable bars)
+                {
+                    foreach (Microsoft.VisualStudio.CommandBars.CommandBar bar in bars)
+                    {
+                        var hit = FindControlRecursive(bar.Controls, needles);
+                        if (hit != null)
+                        {
+                            try { hit.Execute(); Services.Log.Info("Extension Manager opened via menu caption: " + hit.Caption); return true; } catch { }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex) { Services.Log.Info("Extension Manager: CommandBars search failed: " + ex.Message); }
+
+            // 7) диагностика в лог: команды со словом extension
+            try
+            {
+                int logged = 0;
+                foreach (EnvDTE.Command cmd in _dte.Commands)
+                {
+                    var n = cmd?.Name;
+                    if (!string.IsNullOrEmpty(n) && n.IndexOf("extension", StringComparison.OrdinalIgnoreCase) >= 0 && logged < 30)
+                    { Services.Log.Info("DTE ext command candidate: " + n); logged++; }
+                }
+                Services.Log.Info("Extension Manager: no command matched (logged " + logged + " candidates)");
             }
             catch { }
 
             return false;
+        }
+
+        private static Microsoft.VisualStudio.CommandBars.CommandBarControl FindControlRecursive(Microsoft.VisualStudio.CommandBars.CommandBarControls controls, string[] needles)
+        {
+            try
+            {
+                foreach (Microsoft.VisualStudio.CommandBars.CommandBarControl c in controls)
+                {
+                    var cap = (c?.Caption ?? "").Replace("&", "").Trim().ToLowerInvariant();
+                    foreach (var n in needles)
+                        if (cap.Contains(n)) return c;
+
+                    if (c is Microsoft.VisualStudio.CommandBars.CommandBarPopup popup)
+                    {
+                        var sub = FindControlRecursive(popup.Controls, needles);
+                        if (sub != null) return sub;
+                    }
+                }
+            }
+            catch { }
+            return null;
         }
 
         private Services.SpendSettings GetSpendSettings()
